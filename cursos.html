@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cursos — GRIS.EXPERT</title>
+<meta name="description" content="Catálogo de cursos GRIS.EXPERT: gestão de riscos, segurança patrimonial e prevenção de perdas.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#0D2B45; --navy-800:#0A2138; --navy-900:#071726; --navy-700:#16385A; --navy-line:#26496B;
+    --gold:#C9A84C; --gold-dim:#8C6F2E; --gold-soft:#E4D3A0;
+    --paper:#F3EFE6; --paper-line:#DED5B8; --ink:#20211C; --ink-soft:#585648; --slate:#8FA4B8;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{background:var(--navy-900);color:var(--paper);font-family:'IBM Plex Sans',sans-serif;-webkit-font-smoothing:antialiased;}
+  a{color:inherit;}
+  .eyebrow{font-family:'IBM Plex Mono',monospace;letter-spacing:.14em;text-transform:uppercase;font-size:11px;color:var(--gold);}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 32px;}
+  @media (max-width:640px){.wrap{padding:0 20px;}}
+
+  nav.console{background:var(--navy-800);border-bottom:1px solid var(--navy-line);padding:18px 0;position:sticky;top:0;z-index:10;}
+  nav.console .wrap{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;}
+  .brandmark{display:flex;align-items:center;gap:12px;text-decoration:none;}
+  .brandmark .mark{width:34px;height:34px;border:1.5px solid var(--gold);border-radius:50%;position:relative;flex:none;}
+  .brandmark .mark::before{content:"";position:absolute;inset:8px;border:1px solid var(--gold-dim);border-radius:50%;}
+  .brandmark .mark::after{content:"";position:absolute;top:15px;left:15px;width:4px;height:4px;background:var(--gold);border-radius:50%;}
+  .brandmark span{font-family:'Big Shoulders Display',sans-serif;font-weight:800;font-size:19px;letter-spacing:.03em;color:var(--paper);text-transform:uppercase;}
+  .brandmark span em{font-style:normal;color:var(--gold);}
+  .navlinks{display:flex;gap:28px;font-size:14px;}
+  .navlinks a{text-decoration:none;color:var(--slate);}
+  .navlinks a:hover{color:var(--gold);}
+  .navlinks a.active{color:var(--gold);}
+
+  .page-head{padding:56px 0 40px;border-bottom:1px solid var(--navy-line);}
+  .page-head h1{font-family:'Big Shoulders Display',sans-serif;font-weight:800;text-transform:uppercase;
+    font-size:clamp(30px,4.5vw,44px);color:var(--paper);margin:10px 0 12px;}
+  .page-head p{font-size:15px;color:var(--slate);max-width:560px;line-height:1.6;margin:0;}
+
+  .catalog{padding:48px 0 90px;}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;}
+  @media (max-width:760px){.grid{grid-template-columns:1fr;}}
+
+  .card{border-radius:6px;padding:26px 26px;display:flex;flex-direction:column;justify-content:space-between;min-height:210px;}
+  .card.live{background:var(--paper);color:var(--ink);text-decoration:none;}
+  .card.soon{background:var(--navy-800);border:1px solid var(--navy-line);color:var(--paper);}
+  .card .top .pill{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;
+    padding:4px 10px;border-radius:20px;display:inline-block;margin-bottom:12px;}
+  .card.live .pill{background:rgba(140,111,46,.14);color:var(--gold-dim);}
+  .card.soon .pill{border:1px solid var(--navy-line);color:var(--slate);}
+  .card h3{font-family:'Big Shoulders Display',sans-serif;font-weight:800;text-transform:uppercase;font-size:21px;
+    margin:0 0 10px;line-height:1.1;}
+  .card.live h3{color:var(--navy);}
+  .card.soon h3{color:var(--paper);}
+  .card p{font-size:14px;line-height:1.6;margin:0;}
+  .card.live p{color:var(--ink-soft);}
+  .card.soon p{color:var(--slate);}
+  .card .bottom{margin-top:18px;display:flex;align-items:center;justify-content:space-between;}
+  .card .go{font-family:'IBM Plex Mono',monospace;font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;
+    background:var(--navy);color:var(--gold);padding:9px 16px;border-radius:3px;}
+  .card .meta{font-family:'IBM Plex Mono',monospace;font-size:11px;}
+  .card.live .meta{color:var(--gold-dim);}
+  .card.soon .meta{color:var(--slate);}
+
+  footer{padding:36px 0;text-align:center;}
+  footer p{margin:0;font-size:12px;color:var(--slate);font-family:'IBM Plex Mono',monospace;}
+  footer p span{color:var(--gold);}
+</style>
+</head>
+<body>
+
+<nav class="console">
+  <div class="wrap">
+    <a class="brandmark" href="index.html">
+      <span class="mark"></span>
+      <span>GRIS<em>.EXPERT</em></span>
+    </a>
+    <div class="navlinks">
+      <a href="cursos.html" class="active">Cursos</a>
+      <a href="index.html#newsletter">Newsletter</a>
+      <a href="index.html#sobre">Sobre</a>
+    </div>
+  </div>
+</nav>
+
+<section class="page-head">
+  <div class="wrap">
+    <span class="eyebrow">Catálogo</span>
+    <h1>Cursos GRIS.EXPERT</h1>
+    <p>Formação em microaulas para quem atua ou quer atuar em Gestão de Riscos, Segurança Patrimonial e Prevenção de Perdas. Novos cursos são adicionados diretamente aqui.</p>
+  </div>
+</section>
+
+<section class="catalog">
+  <div class="wrap">
+    <div class="grid">
+
+      <a class="card live" href="cursos/gris-expert-curso-gestao-riscos.html">
+        <div class="top">
+          <span class="pill">Disponível</span>
+          <h3>Central de Gestão de Riscos Corporativos</h3>
+          <p>ISO 31000 e COSO ERM em microaulas, do fundamento ao projeto final — com quiz, estudo de caso e preparação para entrevista.</p>
+        </div>
+        <div class="bottom">
+          <span class="meta">12 módulos · Executivo</span>
+          <span class="go">Começar</span>
+        </div>
+      </a>
+
+      <div class="card soon">
+        <div class="top">
+          <span class="pill">Em breve</span>
+          <h3>Segurança Patrimonial na Prática</h3>
+          <p>CFTV, controle de acesso, escolta e inteligência operacional aplicados a operações logísticas de alta escala.</p>
+        </div>
+        <div class="bottom">
+          <span class="meta">Formação executiva</span>
+        </div>
+      </div>
+
+      <div class="card soon">
+        <div class="top">
+          <span class="pill">Em breve</span>
+          <h3>Prevenção de Perdas em E-commerce</h3>
+          <p>Redução de sinistros, gestão de fraudes e indicadores de risco para operações de e-commerce de alta escala.</p>
+        </div>
+        <div class="bottom">
+          <span class="meta">Formação executiva</span>
+        </div>
+      </div>
+
+      <div class="card soon">
+        <div class="top">
+          <span class="pill">Em breve</span>
+          <h3>Torre de Controle e Indicadores de Risco</h3>
+          <p>Como estruturar KRIs, KPIs e dashboards executivos para monitoramento de risco em tempo real.</p>
+        </div>
+        <div class="bottom">
+          <span class="meta">Formação executiva</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>GRIS.EXPERT — <span>Central de Gestão de Riscos Corporativos</span> — conteúdo e consultoria em gestão de riscos, segurança patrimonial e prevenção de perdas.</p>
+  </div>
+</footer>
+
+</body>
+</html>

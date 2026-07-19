@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GRIS.EXPERT — Central de Gestão de Riscos Corporativos</title>
+<meta name="description" content="Plataforma de cursos de GRIS.EXPERT: formação em Gerenciamento de Riscos, Segurança Patrimonial e Prevenção de Perdas.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#0D2B45; --navy-800:#0A2138; --navy-900:#071726; --navy-700:#16385A; --navy-line:#26496B;
+    --gold:#C9A84C; --gold-dim:#8C6F2E; --gold-soft:#E4D3A0;
+    --paper:#F3EFE6; --paper-line:#DED5B8; --ink:#20211C; --ink-soft:#585648; --slate:#8FA4B8;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{background:var(--navy-900);color:var(--paper);font-family:'IBM Plex Sans',sans-serif;-webkit-font-smoothing:antialiased;}
+  a{color:inherit;}
+  .eyebrow{font-family:'IBM Plex Mono',monospace;letter-spacing:.14em;text-transform:uppercase;font-size:11px;color:var(--gold);}
+  .display{font-family:'Big Shoulders Display',sans-serif;text-transform:uppercase;font-weight:800;letter-spacing:.01em;}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 32px;}
+  @media (max-width:640px){.wrap{padding:0 20px;}}
+
+  nav.console{background:var(--navy-800);border-bottom:1px solid var(--navy-line);padding:18px 0;position:sticky;top:0;z-index:10;}
+  nav.console .wrap{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;}
+  .brandmark{display:flex;align-items:center;gap:12px;text-decoration:none;}
+  .brandmark .mark{width:34px;height:34px;border:1.5px solid var(--gold);border-radius:50%;position:relative;flex:none;}
+  .brandmark .mark::before{content:"";position:absolute;inset:8px;border:1px solid var(--gold-dim);border-radius:50%;}
+  .brandmark .mark::after{content:"";position:absolute;top:15px;left:15px;width:4px;height:4px;background:var(--gold);border-radius:50%;}
+  .brandmark span{font-family:'Big Shoulders Display',sans-serif;font-weight:800;font-size:19px;letter-spacing:.03em;color:var(--paper);text-transform:uppercase;}
+  .brandmark span em{font-style:normal;color:var(--gold);}
+  .navlinks{display:flex;gap:28px;font-size:14px;}
+  .navlinks a{text-decoration:none;color:var(--slate);}
+  .navlinks a:hover{color:var(--gold);}
+
+  .hero{padding:88px 0 76px;border-bottom:1px solid var(--navy-line);position:relative;overflow:hidden;}
+  .hero .radar-bg{position:absolute;right:-120px;top:-120px;width:420px;height:420px;opacity:.18;pointer-events:none;}
+  .hero-content{max-width:640px;position:relative;}
+  .hero h1{font-size:clamp(36px,6vw,58px);line-height:1.02;margin:16px 0 20px;color:var(--paper);}
+  .hero h1 em{font-style:normal;color:var(--gold);}
+  .hero p.lead{font-size:17px;line-height:1.7;color:var(--slate);margin:0 0 34px;max-width:520px;}
+  .cta-row{display:flex;gap:14px;flex-wrap:wrap;}
+  .btn{font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.06em;font-size:12.5px;
+    padding:14px 26px;border-radius:3px;text-decoration:none;display:inline-block;}
+  .btn-gold{background:var(--gold);color:var(--navy-900);}
+  .btn-gold:hover{background:var(--gold-soft);}
+  .btn-outline{border:1px solid var(--navy-line);color:var(--paper);}
+  .btn-outline:hover{border-color:var(--gold);color:var(--gold);}
+
+  .pillars{padding:70px 0;border-bottom:1px solid var(--navy-line);}
+  .pillars .head{max-width:520px;margin-bottom:36px;}
+  .pillars h2{font-size:clamp(24px,3vw,32px);color:var(--paper);margin:8px 0 0;}
+  .pillar-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+  @media (max-width:760px){.pillar-grid{grid-template-columns:1fr;}}
+  .pillar{background:var(--navy-800);border:1px solid var(--navy-line);border-radius:6px;padding:24px 22px;}
+  .pillar .num{font-family:'IBM Plex Mono',monospace;color:var(--gold);font-size:12px;}
+  .pillar h3{font-size:17px;margin:10px 0 8px;color:var(--paper);font-weight:500;}
+  .pillar p{font-size:14px;color:var(--slate);line-height:1.6;margin:0;}
+
+  .featured{padding:70px 0;border-bottom:1px solid var(--navy-line);}
+  .featured .head{display:flex;align-items:baseline;justify-content:space-between;gap:20px;margin-bottom:30px;flex-wrap:wrap;}
+  .featured h2{font-size:clamp(24px,3vw,32px);color:var(--paper);margin:8px 0 0;}
+  .featured .see-all{font-size:13px;color:var(--gold);text-decoration:none;font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.05em;}
+  .course-card{background:var(--paper);color:var(--ink);border-radius:6px;padding:28px 30px;display:flex;gap:26px;
+    align-items:center;justify-content:space-between;flex-wrap:wrap;text-decoration:none;}
+  .course-card .info{max-width:560px;}
+  .course-card .tag{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--gold-dim);text-transform:uppercase;letter-spacing:.08em;}
+  .course-card h3{font-family:'Big Shoulders Display',sans-serif;font-weight:800;text-transform:uppercase;
+    font-size:24px;color:var(--navy);margin:8px 0 10px;}
+  .course-card p{font-size:14.5px;color:var(--ink-soft);line-height:1.6;margin:0;}
+  .course-card .go{font-family:'IBM Plex Mono',monospace;font-size:12.5px;text-transform:uppercase;letter-spacing:.06em;
+    background:var(--navy);color:var(--gold);padding:12px 22px;border-radius:3px;flex:none;}
+
+  .newsletter{padding:76px 0;border-bottom:1px solid var(--navy-line);}
+  .newsletter .box{background:var(--navy-800);border:1px solid var(--navy-line);border-radius:6px;
+    padding:40px 40px;display:grid;grid-template-columns:1.1fr 1fr;gap:36px;align-items:center;}
+  @media (max-width:760px){.newsletter .box{grid-template-columns:1fr;padding:30px 24px;}}
+  .newsletter h2{font-size:clamp(22px,3vw,28px);color:var(--paper);margin:8px 0 12px;}
+  .newsletter p{font-size:14.5px;color:var(--slate);line-height:1.6;margin:0;}
+  form.nl-form{display:flex;flex-direction:column;gap:12px;}
+  form.nl-form input[type=email]{
+    background:var(--navy-900);border:1px solid var(--navy-line);color:var(--paper);
+    padding:14px 16px;border-radius:3px;font-family:'IBM Plex Sans',sans-serif;font-size:14px;
+  }
+  form.nl-form input[type=email]:focus{outline:none;border-color:var(--gold);}
+  form.nl-form button{cursor:pointer;}
+  .nl-note{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--slate);}
+  #nl-msg{font-size:13px;color:var(--gold);display:none;}
+
+  footer{padding:36px 0;text-align:center;}
+  footer p{margin:0;font-size:12px;color:var(--slate);font-family:'IBM Plex Mono',monospace;}
+  footer p span{color:var(--gold);}
+</style>
+</head>
+<body>
+
+<nav class="console">
+  <div class="wrap">
+    <a class="brandmark" href="index.html">
+      <span class="mark"></span>
+      <span>GRIS<em>.EXPERT</em></span>
+    </a>
+    <div class="navlinks">
+      <a href="cursos.html">Cursos</a>
+      <a href="#newsletter">Newsletter</a>
+      <a href="#sobre">Sobre</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-content">
+      <span class="eyebrow">Formação executiva em risco e logística</span>
+      <h1>Gestão de riscos, segurança patrimonial e <em>prevenção de perdas</em>, na prática.</h1>
+      <p class="lead">Cursos em microaulas, feitos por quem lidera GRIS em operações de alta escala — construídos para quem quer formação real, não só certificado.</p>
+      <div class="cta-row">
+        <a class="btn btn-gold" href="cursos.html">Ver cursos</a>
+        <a class="btn btn-outline" href="#newsletter">Assinar newsletter</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="pillars">
+  <div class="wrap">
+    <div class="head">
+      <span class="eyebrow">Áreas de formação</span>
+      <h2>Três frentes, uma mesma disciplina</h2>
+    </div>
+    <div class="pillar-grid">
+      <div class="pillar">
+        <span class="num">01</span>
+        <h3>Gerenciamento de Riscos (GRIS)</h3>
+        <p>ISO 31000, COSO ERM, matriz de risco, KPIs e KRIs aplicados à realidade de transporte, logística e e-commerce.</p>
+      </div>
+      <div class="pillar">
+        <span class="num">02</span>
+        <h3>Segurança Patrimonial</h3>
+        <p>CFTV, controle de acesso, escolta, rastreamento e inteligência operacional para proteção de ativos.</p>
+      </div>
+      <div class="pillar">
+        <span class="num">03</span>
+        <h3>Prevenção de Perdas</h3>
+        <p>Redução de sinistros, gestão de fraudes e estruturação de indicadores para operações de alta escala.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="featured">
+  <div class="wrap">
+    <div class="head">
+      <span class="eyebrow">Curso em destaque</span>
+      <a class="see-all" href="cursos.html">Ver catálogo completo →</a>
+    </div>
+    <a class="course-card" href="cursos/gris-expert-curso-gestao-riscos.html">
+      <div class="info">
+        <span class="tag">Disponível agora</span>
+        <h3>Central de Gestão de Riscos Corporativos</h3>
+        <p>Curso completo em microaulas sobre ISO 31000 e COSO ERM, do fundamento ao projeto final — com quiz, estudo de caso e preparação para entrevista em cada aula.</p>
+      </div>
+      <span class="go">Começar curso</span>
+    </a>
+  </div>
+</section>
+
+<section class="newsletter" id="newsletter">
+  <div class="wrap">
+    <div class="box">
+      <div>
+        <span class="eyebrow">Newsletter GRIS.EXPERT</span>
+        <h2>Risco, segurança e logística, direto na sua caixa de entrada.</h2>
+        <p>Um e-mail por semana com análises, ferramentas práticas e aviso em primeira mão de novos cursos.</p>
+      </div>
+      <div>
+        <!--
+          FORMULÁRIO CONFIGURADO PARA O MAILERLITE (plano free, até 1.000 assinantes).
+          Passo a passo para ativar:
+          1. Crie a conta em app.mailerlite.com (não pede cartão).
+          2. Vá em Forms → Create form → Embedded form, e crie um form simples com o campo "Email".
+          3. No código gerado pelo MailerLite, copie o número que aparece em duas partes da URL de action:
+             https://assets.mailerlite.com/jsonp/SEU_ACCOUNT_ID/forms/SEU_FORM_ID/subscribe
+          4. Substitua ACCOUNT_ID e FORM_ID abaixo pelos números copiados. É só isso — o formulário já
+             funciona sem precisar de nenhum backend, hospedagem paga ou servidor próprio.
+        -->
+        <form class="nl-form" id="nl-form"
+              action="https://assets.mailerlite.com/jsonp/ACCOUNT_ID/forms/FORM_ID/subscribe"
+              method="post" target="_blank">
+          <input type="email" name="fields[email]" placeholder="seu@email.com" required>
+          <button class="btn btn-gold" type="submit">Quero assinar</button>
+          <span class="nl-note">Sem spam. Cancele quando quiser.</span>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer id="sobre">
+  <div class="wrap">
+    <p>GRIS.EXPERT — <span>Central de Gestão de Riscos Corporativos</span> — conteúdo e consultoria em gestão de riscos, segurança patrimonial e prevenção de perdas.</p>
+  </div>
+</footer>
+
+</body>
+</html>
