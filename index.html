@@ -35,10 +35,48 @@
   .navlinks a{text-decoration:none;color:var(--slate);}
   .navlinks a:hover{color:var(--gold);}
 
-  .hero{padding:88px 0 76px;border-bottom:1px solid var(--navy-line);position:relative;overflow:hidden;}
-  .hero .radar-bg{position:absolute;right:-120px;top:-120px;width:420px;height:420px;opacity:.18;pointer-events:none;}
-  .hero-content{max-width:640px;position:relative;}
-  .hero h1{font-size:clamp(36px,6vw,58px);line-height:1.02;margin:16px 0 20px;color:var(--paper);}
+  .hero{padding:96px 0 84px;border-bottom:1px solid var(--navy-line);position:relative;overflow:hidden;}
+
+  /* ===== Hero background composition: radar, routes, grid ===== */
+  .hero-bg{position:absolute;inset:0;pointer-events:none;overflow:hidden;}
+  .hero-grid-layer{position:absolute;inset:0;
+    background-image:linear-gradient(rgba(201,168,76,.06) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(201,168,76,.06) 1px, transparent 1px);
+    background-size:46px 46px;
+    mask-image:radial-gradient(ellipse 80% 70% at 70% 30%, black 0%, transparent 75%);
+    -webkit-mask-image:radial-gradient(ellipse 80% 70% at 70% 30%, black 0%, transparent 75%);
+  }
+  .hero-radar{position:absolute;top:-140px;right:-140px;width:520px;height:520px;}
+  .hero-radar .ring{position:absolute;border:1px solid rgba(201,168,76,.22);border-radius:50%;}
+  .hero-radar .r1{inset:110px;}
+  .hero-radar .r2{inset:60px;}
+  .hero-radar .r3{inset:0;}
+  .hero-radar .r4{inset:-60px;border-color:rgba(201,168,76,.12);}
+  .hero-radar .sweep{position:absolute;inset:0;border-radius:50%;overflow:hidden;
+    background:conic-gradient(from 0deg, rgba(201,168,76,.35), transparent 26%, transparent 100%);
+    animation:sweepspin 7s linear infinite;
+  }
+  .hero-radar .core{position:absolute;top:50%;left:50%;width:6px;height:6px;background:var(--gold);
+    border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 0 10px 2px rgba(201,168,76,.6);}
+  @keyframes sweepspin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+
+  .hero-routes{position:absolute;inset:0;width:100%;height:100%;}
+  .hero-routes path{fill:none;stroke:var(--gold-dim);stroke-width:1;opacity:.35;stroke-dasharray:2 6;}
+  .hero-routes circle{fill:var(--gold);opacity:.5;}
+  .hero-routes .pulse{opacity:0;animation:routepulse 4.5s ease-in-out infinite;}
+  .hero-routes .pulse.d2{animation-delay:1.5s;}
+  .hero-routes .pulse.d3{animation-delay:3s;}
+  @keyframes routepulse{0%{opacity:0;r:2;}30%{opacity:.9;}100%{opacity:0;r:7;}}
+
+  .hero-scrim{position:absolute;inset:0;
+    background:linear-gradient(115deg, var(--navy-900) 0%, rgba(7,23,38,.94) 42%, rgba(7,23,38,.62) 75%, rgba(7,23,38,.4) 100%);
+  }
+
+  .hero-inner{position:relative;display:grid;grid-template-columns:1.2fr .8fr;gap:52px;align-items:start;}
+  @media (max-width:860px){.hero-inner{grid-template-columns:1fr;}}
+
+  .hero-content{max-width:600px;position:relative;}
+  .hero h1{font-size:clamp(34px,5.4vw,54px);line-height:1.04;margin:16px 0 20px;color:var(--paper);}
   .hero h1 em{font-style:normal;color:var(--gold);}
   .hero p.lead{font-size:17px;line-height:1.7;color:var(--slate);margin:0 0 34px;max-width:520px;}
   .cta-row{display:flex;gap:14px;flex-wrap:wrap;}
@@ -48,6 +86,24 @@
   .btn-gold:hover{background:var(--gold-soft);}
   .btn-outline{border:1px solid var(--navy-line);color:var(--paper);}
   .btn-outline:hover{border-color:var(--gold);color:var(--gold);}
+
+  /* ===== Hero profile panel ===== */
+  .hero-profile{position:relative;background:rgba(10,33,56,.72);border:1px solid var(--navy-line);
+    border-radius:8px;padding:30px 28px;backdrop-filter:blur(2px);}
+  .hp-avatar{width:96px;height:96px;border-radius:50%;border:1.5px solid var(--gold);
+    display:flex;align-items:center;justify-content:center;margin-bottom:16px;overflow:hidden;
+    box-shadow:0 0 0 4px rgba(201,168,76,.08);}
+  .hp-avatar span{font-family:'Big Shoulders Display',sans-serif;font-weight:800;font-size:18px;color:var(--gold);letter-spacing:.02em;}
+  .hp-avatar img{width:100%;height:100%;object-fit:cover;object-position:60% 25%;display:block;}
+  .hero-profile .eyebrow{display:block;margin-bottom:6px;}
+  .hero-profile h3{font-family:'Big Shoulders Display',sans-serif;font-weight:800;text-transform:uppercase;
+    font-size:22px;color:var(--paper);margin:0 0 8px;letter-spacing:.01em;}
+  .hp-title{font-size:13px;color:var(--gold-soft);line-height:1.5;margin:0 0 14px;}
+  .hp-bio{font-size:13.5px;color:var(--slate);line-height:1.65;margin:0 0 22px;}
+  .hp-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding-top:18px;border-top:1px solid var(--navy-line);}
+  .hp-stats .stat{display:flex;flex-direction:column;gap:3px;}
+  .hp-stats strong{font-family:'Big Shoulders Display',sans-serif;font-weight:800;font-size:22px;color:var(--gold);letter-spacing:.01em;}
+  .hp-stats span{font-size:10.5px;color:var(--slate);line-height:1.35;}
 
   .pillars{padding:70px 0;border-bottom:1px solid var(--navy-line);}
   .pillars .head{max-width:520px;margin-bottom:36px;}
@@ -111,7 +167,27 @@
 </nav>
 
 <section class="hero">
-  <div class="wrap">
+  <div class="hero-bg" aria-hidden="true">
+    <div class="hero-grid-layer"></div>
+    <div class="hero-radar">
+      <span class="ring r1"></span>
+      <span class="ring r2"></span>
+      <span class="ring r3"></span>
+      <span class="ring r4"></span>
+      <span class="sweep"></span>
+      <span class="core"></span>
+    </div>
+    <svg class="hero-routes" viewBox="0 0 1080 520" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M -20 420 C 220 380, 340 460, 520 380 S 820 300, 1100 340" />
+      <path d="M -20 180 C 180 220, 300 120, 500 160 S 760 240, 1100 140" />
+      <path d="M -20 300 C 260 260, 420 340, 600 260 S 900 180, 1100 240" />
+      <circle class="pulse" cx="520" cy="380" r="3"></circle>
+      <circle class="pulse d2" cx="500" cy="160" r="3"></circle>
+      <circle class="pulse d3" cx="600" cy="260" r="3"></circle>
+    </svg>
+    <div class="hero-scrim"></div>
+  </div>
+  <div class="wrap hero-inner">
     <div class="hero-content">
       <span class="eyebrow">Formação executiva em risco e logística</span>
       <h1>Gestão de riscos, segurança patrimonial e <em>prevenção de perdas</em>, na prática.</h1>
@@ -121,6 +197,18 @@
         <a class="btn btn-outline" href="#newsletter">Assinar newsletter</a>
       </div>
     </div>
+    <aside class="hero-profile">
+      <div class="hp-avatar"><img src="assets/andre-araujo.jpg" alt="André Araújo"></div>
+      <span class="eyebrow">Fundador — GRIS.EXPERT</span>
+      <h3>André Araújo</h3>
+      <p class="hp-title">Especialista em Gerenciamento de Riscos (GRIS), Segurança Patrimonial e Prevenção de Perdas</p>
+      <p class="hp-bio">Mais de 25 anos liderando operações logísticas de alta escala, incluindo operações nacionais para grandes marketplaces como Shopee e Mercado Livre — com projetos e planejamento tático que já geraram resultados expressivos de redução de perdas e eficiência operacional.</p>
+      <div class="hp-stats">
+        <div class="stat"><strong>80%</strong><span>redução em furto/roubo de carga</span></div>
+        <div class="stat"><strong>50%</strong><span>redução em sinistros operacionais</span></div>
+        <div class="stat"><strong>3M+</strong><span>volumes/mês gerenciados</span></div>
+      </div>
+    </aside>
   </div>
 </section>
 
