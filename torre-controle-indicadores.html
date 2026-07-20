@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Torre de Controle e Indicadores de Risco — GRIS.EXPERT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#0D2B45; --navy-800:#0A2138; --navy-900:#071726; --navy-700:#16385A; --navy-line:#26496B;
+    --gold:#C9A84C; --gold-dim:#8C6F2E; --gold-soft:#E4D3A0;
+    --paper:#F3EFE6; --paper-line:#DED5B8; --ink:#20211C; --ink-soft:#585648;
+    --rust:#A63D2F; --rust-soft:#F1DCD6; --ok:#3F6B4B; --ok-soft:#DCE8DD; --slate:#8FA4B8;
+    --update:#2E5C8A; --update-soft:#DCE7F1;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{background:var(--navy-900);color:var(--paper);font-family:'IBM Plex Sans',sans-serif;-webkit-font-smoothing:antialiased;}
+  .eyebrow{font-family:'IBM Plex Mono',monospace;letter-spacing:.14em;text-transform:uppercase;font-size:11px;color:var(--gold);}
+  .display{font-family:'Big Shoulders Display',sans-serif;text-transform:uppercase;font-weight:800;letter-spacing:.01em;}
+
+  header.console{background:linear-gradient(180deg,var(--navy-800),var(--navy));border-bottom:1px solid var(--navy-line);
+    padding:22px 32px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;}
+  .brandmark{display:flex;align-items:center;gap:16px;}
+  .brandmark .mark{width:46px;height:46px;border:1.5px solid var(--gold);border-radius:50%;position:relative;flex:none;}
+  .brandmark .mark::before{content:"";position:absolute;width:26px;height:26px;top:9px;left:9px;border:1px solid var(--gold-dim);border-radius:50%;}
+  .brandmark .mark::after{content:"";position:absolute;top:20px;left:20px;width:5px;height:5px;background:var(--gold);border-radius:50%;}
+  .brandmark h1{font-family:'Big Shoulders Display',sans-serif;font-weight:800;font-size:20px;letter-spacing:.03em;margin:0;color:var(--paper);text-transform:uppercase;}
+  .brandmark h1 span{color:var(--gold);}
+  .brandmark p{margin:2px 0 0;font-size:12.5px;color:var(--slate);}
+  .back-link{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--slate);text-decoration:none;text-transform:uppercase;letter-spacing:.05em;}
+  .back-link:hover{color:var(--gold);}
+
+  .radar-wrap{display:flex;align-items:center;gap:14px;}
+  .radar{position:relative;width:60px;height:60px;flex:none;}
+  .radar svg{width:100%;height:100%;transform:rotate(-90deg);}
+  .radar .ring-bg{fill:none;stroke:var(--navy-line);stroke-width:5;}
+  .radar .ring-fg{fill:none;stroke:var(--gold);stroke-width:5;stroke-linecap:round;transition:stroke-dashoffset .6s ease;}
+  .radar .rlabel{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--gold);}
+  .radar-text .t1{font-size:11.5px;color:var(--slate);margin:0;}
+  .radar-text .t2{font-size:13.5px;color:var(--paper);margin:0;font-weight:500;}
+
+  .shell{display:grid;grid-template-columns:300px 1fr;min-height:calc(100vh - 92px);}
+  @media (max-width:860px){.shell{grid-template-columns:1fr;}}
+
+  aside.manifest{background:var(--navy-800);border-right:1px solid var(--navy-line);padding:22px 0 40px;}
+  .manifest-head{padding:0 22px 16px;border-bottom:1px solid var(--navy-line);margin-bottom:6px;}
+  .manifest-head p{margin:0;font-size:13px;color:var(--slate);line-height:1.5;}
+
+  .mod-row{display:block;width:100%;text-align:left;background:none;border:none;cursor:pointer;
+    padding:13px 22px;color:var(--paper);border-bottom:1px solid var(--navy-line);font-family:inherit;}
+  .mod-row:hover{background:var(--navy-700);}
+  .mod-row.active{background:var(--navy-700);box-shadow:inset 3px 0 0 var(--gold);}
+  .mod-row .row-top{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+  .mod-num{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--gold);}
+  .mod-title{font-size:13.5px;font-weight:500;margin:3px 0 0;line-height:1.3;}
+  .pill{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.06em;padding:3px 8px;border-radius:20px;text-transform:uppercase;flex:none;}
+  .pill.live{background:rgba(201,168,76,.16);color:var(--gold);border:1px solid var(--gold-dim);}
+  .pill.soon{background:transparent;color:var(--slate);border:1px solid var(--navy-line);}
+
+  .lesson-list{margin-top:10px;padding-left:2px;}
+  .lesson-item{display:flex;align-items:center;gap:10px;width:100%;background:none;border:none;cursor:pointer;
+    color:var(--slate);font-family:inherit;font-size:12.5px;padding:8px 4px 8px 10px;text-align:left;border-left:2px solid transparent;}
+  .lesson-item:hover{color:var(--paper);}
+  .lesson-item.active{color:var(--gold);border-left-color:var(--gold);}
+  .lesson-dot{width:16px;height:16px;border-radius:50%;border:1.5px solid var(--navy-line);flex:none;display:flex;align-items:center;justify-content:center;font-size:9px;color:transparent;}
+  .lesson-item.done .lesson-dot{border-color:var(--gold);background:var(--gold);color:var(--navy-900);}
+  .lesson-item.active .lesson-dot{border-color:var(--gold);}
+
+  main{padding:40px 44px 90px;}
+  @media (max-width:640px){main{padding:28px 18px 70px;}}
+
+  .doc{background:var(--paper);color:var(--ink);border-radius:6px;max-width:840px;margin:0 auto;padding:44px 48px 56px;border:1px solid var(--paper-line);}
+  @media (max-width:640px){.doc{padding:28px 22px 40px;}}
+  .doc .eyebrow{color:var(--gold-dim);}
+  .doc h2.display{font-size:clamp(28px,4vw,40px);color:var(--navy);margin:8px 0 22px;line-height:1.08;}
+  .doc-meta{display:flex;gap:18px;flex-wrap:wrap;margin:0 0 26px;padding-bottom:22px;border-bottom:1px solid var(--paper-line);}
+  .doc-meta div{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--ink-soft);}
+  .doc-meta strong{display:block;color:var(--ink);font-family:'IBM Plex Sans',sans-serif;font-size:13.5px;font-weight:500;margin-top:2px;}
+  .doc p{font-size:16px;line-height:1.75;margin:0 0 18px;color:var(--ink);}
+  .doc p strong{color:var(--navy);}
+
+  .update-box{background:var(--update-soft);border-left:3px solid var(--update);border-radius:0 4px 4px 0;padding:14px 18px;margin:0 0 18px;}
+  .update-box p{margin:0;font-size:14.5px;color:#1C3A57;line-height:1.6;}
+
+  .section-label{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--navy);margin:40px 0 14px;padding-top:22px;border-top:1px solid var(--paper-line);display:flex;align-items:center;gap:10px;}
+  .section-label::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--gold);flex:none;}
+
+  ul.doc-list{margin:0 0 6px;padding-left:0;list-style:none;}
+  ul.doc-list li{position:relative;padding:6px 0 6px 22px;font-size:15px;line-height:1.6;color:var(--ink);}
+  ul.doc-list li::before{content:"—";position:absolute;left:0;color:var(--gold-dim);}
+
+  .concept-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:6px;}
+  @media (max-width:640px){.concept-grid{grid-template-columns:1fr;}}
+  .concept-card{background:#fff;border:1px solid var(--paper-line);border-radius:4px;padding:14px 16px;}
+  .concept-card .term{font-weight:600;color:var(--navy);font-size:14px;margin:0 0 4px;}
+  .concept-card .def{font-size:13.5px;color:var(--ink-soft);margin:0;line-height:1.5;}
+
+  .warn-box{background:var(--rust-soft);border-left:3px solid var(--rust);border-radius:0 4px 4px 0;padding:12px 16px;margin-bottom:10px;}
+  .warn-box p{margin:0;font-size:14.5px;color:#5A231C;line-height:1.55;}
+  .warn-box p strong{color:#5A231C;}
+
+  .task-box{background:#fff;border:1px dashed var(--gold-dim);border-radius:4px;padding:20px 22px;}
+  .task-box p{margin:0;font-size:15px;}
+
+  .case-box{background:var(--navy);color:var(--paper);border-radius:4px;padding:24px 26px;}
+  .case-box p{color:var(--paper);font-size:15px;line-height:1.7;margin:0;}
+  .case-box .eyebrow{color:var(--gold);margin-bottom:8px;display:block;}
+
+  .quiz-item{margin-bottom:22px;padding-bottom:20px;border-bottom:1px solid var(--paper-line);}
+  .quiz-item:last-child{border-bottom:none;}
+  .quiz-q{font-size:15px;font-weight:500;color:var(--navy);margin:0 0 10px;}
+  .quiz-q span{font-family:'IBM Plex Mono',monospace;color:var(--gold-dim);margin-right:8px;}
+  .quiz-opt{display:flex;align-items:flex-start;gap:10px;padding:9px 12px;border:1px solid var(--paper-line);border-radius:4px;margin-bottom:8px;cursor:pointer;background:#fff;font-size:14px;line-height:1.4;}
+  .quiz-opt:hover{border-color:var(--gold-dim);}
+  .quiz-opt input{margin-top:2px;accent-color:var(--gold-dim);flex:none;}
+  .quiz-opt.correct{background:var(--ok-soft);border-color:var(--ok);}
+  .quiz-opt.wrong{background:var(--rust-soft);border-color:var(--rust);}
+  .quiz-actions{display:flex;align-items:center;gap:16px;margin-top:24px;}
+  .btn-check{font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.06em;font-size:12.5px;background:var(--navy);color:var(--gold);border:none;padding:12px 26px;border-radius:3px;cursor:pointer;}
+  .btn-check:hover{background:var(--navy-700);}
+  #quiz-score{font-size:14px;color:var(--ink-soft);}
+  #quiz-score strong{color:var(--navy);}
+
+  .glossary-item{padding:10px 0;border-bottom:1px solid var(--paper-line);}
+  .glossary-item:last-child{border-bottom:none;}
+  .glossary-item .g-term{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--gold-dim);text-transform:uppercase;letter-spacing:.03em;}
+  .glossary-item .g-def{font-size:14.5px;margin:3px 0 0;color:var(--ink);}
+
+  .interview-item{margin-bottom:16px;}
+  .interview-q{font-size:15px;font-weight:500;color:var(--navy);margin:0 0 6px;}
+  .interview-a{font-size:14.5px;color:var(--ink-soft);margin:0;line-height:1.6;padding-left:14px;border-left:2px solid var(--gold-soft);}
+
+  .locked-doc{max-width:840px;margin:0 auto;}
+  .locked-doc .eyebrow{color:var(--gold);}
+  .locked-doc h2{font-family:'Big Shoulders Display',sans-serif;font-weight:800;text-transform:uppercase;color:var(--paper);font-size:clamp(26px,4vw,36px);margin:10px 0 16px;}
+  .locked-doc>p{color:var(--slate);font-size:15px;line-height:1.7;max-width:620px;margin:0 0 30px;}
+  .topics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;}
+  .topic-chip{border:1px solid var(--navy-line);border-radius:4px;padding:12px 14px;font-size:13.5px;color:var(--paper);background:var(--navy-800);}
+  .lock-note{margin-top:34px;display:flex;align-items:center;gap:10px;color:var(--gold);font-size:13px;font-family:'IBM Plex Mono',monospace;}
+
+  footer.console-foot{text-align:center;padding:26px;color:var(--slate);font-size:12px;border-top:1px solid var(--navy-line);font-family:'IBM Plex Mono',monospace;}
+  footer.console-foot span{color:var(--gold);}
+</style>
+</head>
+<body>
+
+<header class="console">
+  <div class="brandmark">
+    <div class="mark"></div>
+    <div>
+      <h1>GRIS<span>.EXPERT</span></h1>
+      <p>Torre de Controle e Indicadores de Risco</p>
+    </div>
+  </div>
+  <div class="radar-wrap">
+    <a class="back-link" href="../cursos.html">← Voltar ao catálogo</a>
+    <div class="radar">
+      <svg viewBox="0 0 64 64">
+        <circle class="ring-bg" cx="32" cy="32" r="27"></circle>
+        <circle id="ring-fg" class="ring-fg" cx="32" cy="32" r="27" stroke-dasharray="169.6" stroke-dashoffset="169.6"></circle>
+      </svg>
+      <div class="rlabel" id="ring-label">0/5</div>
+    </div>
+    <div class="radar-text">
+      <p class="t1">Progresso — Módulo 01</p>
+      <p class="t2" id="progress-text">Nenhuma aula concluída</p>
+    </div>
+  </div>
+</header>
+
+<div class="shell">
+  <aside class="manifest" id="manifest"></aside>
+  <main id="main"></main>
+</div>
+
+<footer class="console-foot">GRIS.EXPERT — <span>Torre de Controle e Indicadores de Risco</span> — KRIs, KPIs e dashboards executivos para monitoramento de risco em tempo real</footer>
+
+<script>
+const MODULES = [
+  {n:1, title:"Fundamentos da Torre de Controle", live:true,
+   topics:["O que é uma Torre de Controle","KPI x KRI","Por que e-commerce de alta escala exige Torre de Controle","Os quatro pilares da Torre de Controle","🔄 De painel estático a monitoramento preditivo"]},
+  {n:2, title:"Construindo KRIs e KPIs que Fazem Sentido", live:false,
+   topics:["Como escolher um bom indicador","KPIs operacionais essenciais","KRIs de risco essenciais","Definindo limites de alerta","Erros comuns na definição de indicadores"]},
+  {n:3, title:"Fontes de Dados e Integração", live:false,
+   topics:["Mapeando fontes de dados: TMS, WMS, rastreadores, telemetria, CFTV","Integração de dados dispersos","Qualidade de dado","Integração via API e coleta em tempo real","Governança de dados"]},
+  {n:4, title:"Construindo Dashboards Executivos", live:false,
+   topics:["Dashboard operacional x executivo","Princípios de design de um bom dashboard","Painéis no Power BI aplicados a GRIS","Storytelling com dados","Erros comuns em dashboards executivos"]},
+  {n:5, title:"Monitoramento em Tempo Real e Alertas", live:false,
+   topics:["Fluxo de alerta: do dado bruto à ação","Responsáveis e SLA de resposta","Evitando fadiga de alerta","Automação de primeira resposta com IA","Integração com protocolos de contingência"]},
+  {n:6, title:"Governança, Cadência de Reporte e Cultura de Indicador", live:false,
+   topics:["Cadência de reporte","Comitês de indicadores","Cultura de indicador na operação","Auditoria e revisão periódica","Indicadores de risco e resultado financeiro"]},
+  {n:7, title:"Estudos de Caso e Simulações", live:false,
+   topics:["Torre de Controle que reduziu tempo de resposta","Dashboard mal desenhado que escondeu um risco","Simulação: definindo 5 KRIs","Simulação: desenhando um dashboard","Simulação: apresentação para a diretoria"]},
+  {n:8, title:"Carreira e Projeto Final", live:false,
+   topics:["Como falar sobre Torre de Controle em entrevistas","Perguntas frequentes sobre KPIs e KRIs","Portfólio: dado em decisão executiva","Erro de carreira: focar só na ferramenta","Projeto Final: Torre de Controle completa"]},
+];
+
+const LESSONS = [
+{
+  id:1, title:"O que é uma Torre de Controle e por que ela vai além do monitoramento tradicional", duration:"11 min", level:"Introdutório",
+  content:[
+    "Quando alguém fala em \"Torre de Controle\" dentro de uma operação logística, é comum imaginar uma versão mais bonita da central de monitoramento — mais telas, mais gráficos, mesma função. Essa visão está incompleta. A diferença central não está na quantidade de telas, e sim no <strong>objetivo</strong>: enquanto uma central de monitoramento tradicional acompanha viagens e trata ocorrências, uma Torre de Controle acompanha o <strong>desempenho da operação inteira</strong> — prazo, custo, qualidade e risco — de forma integrada.",
+    "Pense assim: a central de monitoramento pergunta \"essa viagem específica está segura agora?\". A Torre de Controle pergunta \"como está a saúde da operação como um todo, hoje, essa semana, este mês — e o que isso significa para o resultado do negócio?\". São perguntas diferentes, que exigem estruturas diferentes, mesmo que compartilhem parte da mesma tecnologia de base.",
+    "Uma Torre de Controle bem estruturada reúne, em um único ambiente de decisão, indicadores operacionais (como SLA de entrega e índice de avarias) e indicadores de risco (como sinistralidade e exposição por rota), permitindo que a liderança enxergue não só \"o que está acontecendo\", mas \"o que está acontecendo e por quê, e o que fazer a respeito\".",
+    "É por isso que a Torre de Controle não é uma função exclusiva de TI, nem uma função exclusiva de GRIS — ela nasce, geralmente, da colaboração entre as duas áreas. TI garante que os dados estejam disponíveis, integrados e confiáveis; GRIS garante que os indicadores certos estejam sendo olhados e que eles gerem ação, não só um relatório bonito no fim do mês.",
+    "Um erro comum é achar que basta comprar uma ferramenta de BI e conectar algumas fontes de dados para ter uma Torre de Controle funcionando. A tecnologia é só uma parte — sem indicadores bem definidos, sem responsáveis claros por cada alerta e sem uma cadência de decisão estruturada, o resultado é só um painel bonito que ninguém usa para decidir nada.",
+    "Ao longo deste curso, você vai aprender a construir, do zero, os quatro elementos que sustentam uma Torre de Controle de verdade: indicadores relevantes, dados confiáveis, dashboards que comunicam com clareza e um fluxo de decisão que transforma dado em ação."
+  ],
+  resumo:[
+    "Torre de Controle acompanha a saúde da operação inteira (prazo, custo, qualidade, risco), não só viagens individuais.",
+    "Central de monitoramento e Torre de Controle compartilham tecnologia, mas respondem perguntas diferentes.",
+    "Uma Torre de Controle madura integra indicadores operacionais e de risco no mesmo ambiente de decisão.",
+    "Nasce da colaboração entre TI (dados confiáveis) e GRIS (indicadores certos e geração de ação).",
+    "Tecnologia de BI sozinha não faz uma Torre de Controle funcionar — falta indicador, responsável e cadência de decisão."
+  ],
+  conceitos:[
+    {term:"Torre de Controle", def:"Estrutura que monitora o desempenho integrado de uma operação (prazo, custo, qualidade, risco) para sustentar decisão."},
+    {term:"Ambiente de decisão", def:"Espaço (físico ou digital) onde indicadores são analisados e transformados em ação concreta."},
+    {term:"Indicador operacional", def:"Métrica que mede a execução do processo em si (ex: SLA, tempo de trânsito)."},
+    {term:"Indicador de risco", def:"Métrica que sinaliza exposição a eventos que podem gerar perda (ex: sinistralidade)."}
+  ],
+  erros:[
+    "Achar que Torre de Controle é sinônimo de central de monitoramento com mais telas.",
+    "Tratar a Torre de Controle como projeto exclusivo de TI, sem envolvimento de GRIS na definição de indicadores.",
+    "Comprar ferramenta de BI antes de definir quais indicadores realmente importam para a operação.",
+    "Construir um painel sem responsável definido para agir sobre o que ele mostra."
+  ],
+  exercicio:"Escreva duas perguntas que uma central de monitoramento tradicional responderia sobre uma operação, e duas perguntas que só uma Torre de Controle integrada conseguiria responder. Use exemplos da sua própria experiência, se possível.",
+  quiz:[
+    {q:"Qual é a principal diferença entre uma central de monitoramento tradicional e uma Torre de Controle?", opts:["Não existe diferença real, são sinônimos","A Torre de Controle acompanha o desempenho integrado da operação, não só viagens individuais","A central de monitoramento sempre tem mais tecnologia","A Torre de Controle não usa nenhum dado de rastreamento"], correct:1},
+    {q:"Uma Torre de Controle bem estruturada integra, no mesmo ambiente de decisão:", opts:["Apenas indicadores financeiros","Indicadores operacionais e indicadores de risco","Apenas dados de rastreamento em tempo real","Somente relatórios anuais de auditoria"], correct:1},
+    {q:"Por que a Torre de Controle geralmente nasce da colaboração entre TI e GRIS?", opts:["Porque TI garante dados confiáveis e GRIS garante indicadores certos e geração de ação","Porque são a mesma área na maioria das empresas","Porque TI define sozinha quais indicadores são relevantes","Porque GRIS não tem nenhuma relação com dados"], correct:0},
+    {q:"Qual é o erro mais comum ao tentar implantar uma Torre de Controle?", opts:["Definir indicadores antes de comprar qualquer ferramenta","Achar que basta comprar uma ferramenta de BI e conectar dados para funcionar sozinha","Envolver GRIS na definição dos indicadores","Ter responsáveis definidos para cada alerta"], correct:1},
+    {q:"Um painel de indicadores sem responsável definido para agir sobre ele tende a se tornar:", opts:["Uma ferramenta estratégica indispensável","Um painel bonito que ninguém usa para decidir nada","O modelo ideal de Torre de Controle","Automaticamente mais preciso que um painel com responsável"], correct:1},
+    {q:"Qual pergunta está mais alinhada ao propósito de uma Torre de Controle (em vez de uma central de monitoramento tradicional)?", opts:["\"Essa viagem específica está segura agora?\"","\"Como está a saúde da operação como um todo esta semana, e o que isso significa para o resultado do negócio?\"","\"Qual a placa do veículo nesta rota?\"","\"O motorista já chegou ao ponto de parada?\""], correct:1},
+    {q:"Os quatro elementos que sustentam uma Torre de Controle, segundo esta aula, são:", opts:["Apenas tecnologia e orçamento","Indicadores relevantes, dados confiáveis, dashboards claros e fluxo de decisão que gera ação","Apenas CFTV e rastreamento via satélite","Somente relatórios financeiros mensais"], correct:1},
+    {q:"Indicador operacional, como definido nesta aula, mede principalmente:", opts:["A exposição a eventos que podem gerar perda","A execução do processo em si, como SLA e tempo de trânsito","Exclusivamente o resultado financeiro da empresa","O comportamento de compra do cliente final"], correct:1},
+    {q:"Indicador de risco (KRI), como definido nesta aula, mede principalmente:", opts:["A exposição a eventos que podem gerar perda, como sinistralidade","Apenas o tempo de entrega médio","O número de funcionários da operação","A quantidade de veículos da frota"], correct:0},
+    {q:"Por que a tecnologia de BI, sozinha, não garante uma Torre de Controle funcional?", opts:["Porque ferramentas de BI nunca funcionam em operações logísticas","Porque falta indicador bem definido, responsável e cadência de decisão para transformar dado em ação","Porque BI é incompatível com dados de rastreamento","Porque toda ferramenta de BI já vem com indicadores prontos de GRIS"], correct:1}
+  ],
+  caso:"Uma operação de e-commerce implanta uma ferramenta de BI robusta, conecta dados de TMS, WMS e rastreamento, e produz um painel com mais de 40 gráficos diferentes. Três meses depois, a diretoria continua tomando decisões com base em planilhas paralelas, porque ninguém sabe exatamente qual dos 40 gráficos deveria disparar qual ação, nem quem é responsável por reagir a cada um. A empresa reduz o painel para 8 indicadores centrais, define um responsável para cada um e cria uma reunião semanal de 30 minutos só para revisar esses 8 números. Em poucas semanas, o painel volta a ser usado — não porque ficou tecnicamente melhor, mas porque passou a ter indicador certo, responsável definido e cadência de decisão.",
+  glossario:[
+    {term:"BI (Business Intelligence)", def:"Conjunto de ferramentas e processos usados para transformar dado bruto em informação para decisão."},
+    {term:"SLA", def:"Service Level Agreement — acordo de nível de serviço que define metas de desempenho contratuais."},
+    {term:"Cadência de decisão", def:"Frequência e formato estruturado em que indicadores são revisados e transformados em ação."},
+    {term:"Painel de indicadores", def:"Interface visual que reúne métricas relevantes para acompanhamento de uma operação."}
+  ],
+  entrevista:[
+    {q:"Como você diferenciaria uma central de monitoramento de uma Torre de Controle?", tip:"Use a distinção de propósito: uma acompanha viagem por viagem, a outra acompanha a saúde da operação como um todo — prazo, custo, qualidade e risco juntos."},
+    {q:"Você já participou da implantação de uma Torre de Controle ou de um projeto de indicadores? O que funcionou e o que não funcionou?", tip:"Traga um exemplo concreto de indicador que gerou ação real, e, se possível, um exemplo de painel que não foi usado — mostra visão crítica, não só técnica."},
+    {q:"Na sua visão, de quem deveria ser a responsabilidade por definir os indicadores de uma Torre de Controle?", tip:"Defenda a colaboração entre TI e GRIS (ou área de risco/operação) — mostra que você entende que tecnologia sozinha não resolve o problema."}
+  ]
+},
+{
+  id:2, title:"Diferença entre indicador operacional e indicador de risco (KPI x KRI)", duration:"12 min", level:"Introdutório",
+  content:[
+    "KPI e KRI são duas siglas que, na prática do dia a dia, acabam sendo usadas de forma intercambiável — e isso é um problema, porque elas medem coisas diferentes e servem a propósitos diferentes dentro de uma Torre de Controle.",
+    "<strong>KPI (Key Performance Indicator)</strong> é um indicador-chave de desempenho: ele mede o quão bem um processo está sendo executado em relação a uma meta. SLA de entrega, tempo médio de trânsito, índice de avarias, custo por quilômetro rodado — todos são exemplos de KPI. A pergunta que um KPI responde é: <strong>\"estamos entregando o que prometemos, dentro do padrão esperado?\"</strong>",
+    "<strong>KRI (Key Risk Indicator)</strong> é um indicador-chave de risco: ele não mede desempenho, mede <strong>exposição a um evento futuro indesejado</strong>. Sinistralidade por rota, tempo médio de resposta a uma ocorrência, percentual de viagens sem cobertura de rastreamento em tempo real — são exemplos de KRI. A pergunta que um KRI responde é: <strong>\"o quão perto estamos de um problema que ainda não aconteceu?\"</strong>",
+    "A confusão entre os dois é perigosa porque um KPI bom pode esconder um KRI ruim. Uma operação pode ter SLA de entrega excelente (KPI ótimo) e, ao mesmo tempo, estar operando em rotas de altíssimo risco sem nenhum controle adicional (KRI péssimo) — o desempenho está bom porque o risco ainda não se materializou, não porque ele não existe.",
+    "Uma Torre de Controle bem construída acompanha os dois tipos de indicador lado a lado, exatamente para evitar esse ponto cego. Olhar só para KPI é like dirigir olhando apenas o velocímetro, sem olhar o nível de combustível ou a luz de alerta do motor — tudo parece bem até o momento em que para de parecer.",
+    "Uma forma prática de diferenciar os dois na hora de definir um novo indicador: se ele mede o que já aconteceu e quão bem foi executado, é KPI. Se ele mede a chance ou proximidade de algo ruim acontecer no futuro, é KRI. Os dois são necessários — e, como veremos no Módulo 2, os melhores dashboards de Torre de Controle sempre colocam KPI e KRI lado a lado, nunca em telas separadas."
+  ],
+  resumo:[
+    "KPI mede desempenho de execução em relação a uma meta (\"estamos entregando bem?\").",
+    "KRI mede exposição a um evento de risco futuro (\"quão perto estamos de um problema?\").",
+    "Um KPI bom pode esconder um KRI ruim — desempenho aparente não significa ausência de risco.",
+    "Olhar só KPI é um ponto cego clássico de operações que só amadurecem depois de um sinistro grande.",
+    "KPI e KRI devem estar lado a lado no mesmo painel, nunca em telas separadas."
+  ],
+  conceitos:[
+    {term:"KPI", def:"Key Performance Indicator — mede o desempenho de execução de um processo em relação a uma meta."},
+    {term:"KRI", def:"Key Risk Indicator — mede a exposição a um evento de risco que ainda não se materializou."},
+    {term:"Ponto cego de indicador", def:"Situação em que um bom resultado de KPI mascara um risco real não capturado por nenhum indicador."},
+    {term:"Meta de desempenho", def:"Valor de referência que define o que é considerado uma boa execução para determinado KPI."}
+  ],
+  erros:[
+    "Usar KPI e KRI como sinônimos em relatórios e reuniões de indicadores.",
+    "Montar dashboards que mostram só KPI, sem nenhum KRI visível.",
+    "Achar que SLA bom significa, automaticamente, risco baixo.",
+    "Criar KRIs genéricos demais, que não conseguem antecipar nada de específico sobre a operação."
+  ],
+  exercicio:"Liste três métricas que sua operação (atual ou anterior) já acompanha. Para cada uma, classifique se é KPI ou KRI, e justifique com a pergunta que ela responde: \"estamos executando bem?\" (KPI) ou \"quão perto estamos de um problema?\" (KRI).",
+  quiz:[
+    {q:"O que um KPI mede, segundo esta aula?", opts:["A exposição a um evento de risco futuro","O desempenho de execução de um processo em relação a uma meta","Apenas o resultado financeiro da empresa","O comportamento de compra do cliente"], correct:1},
+    {q:"O que um KRI mede, segundo esta aula?", opts:["O desempenho de execução de um processo","A exposição a um evento de risco que ainda não se materializou","Apenas a satisfação do cliente","O número de funcionários da operação"], correct:1},
+    {q:"Qual pergunta um KPI responde?", opts:["\"Quão perto estamos de um problema que ainda não aconteceu?\"","\"Estamos entregando o que prometemos, dentro do padrão esperado?\"","\"Qual o lucro líquido do trimestre?\"","\"Quantos clientes novos foram conquistados?\""], correct:1},
+    {q:"Qual pergunta um KRI responde?", opts:["\"Estamos entregando dentro do padrão esperado?\"","\"Quão perto estamos de um problema que ainda não aconteceu?\"","\"Qual o custo médio por entrega?\"","\"Qual o tempo médio de contratação de um novo motorista?\""], correct:1},
+    {q:"Por que a confusão entre KPI e KRI é considerada perigosa nesta aula?", opts:["Porque um KPI bom pode esconder um KRI ruim, mascarando risco real","Porque KPI e KRI sempre apontam na mesma direção","Porque KRI é sempre mais importante que KPI em qualquer situação","Porque a confusão não gera nenhum impacto prático"], correct:0},
+    {q:"Uma operação com SLA de entrega excelente, mas operando em rotas de altíssimo risco sem controle adicional, é um exemplo de:", opts:["KRI bom mascarando KPI ruim","KPI bom mascarando KRI ruim","Ausência total de qualquer indicador","Situação impossível de ocorrer na prática"], correct:1},
+    {q:"A analogia usada na aula para \"olhar só KPI\" compara essa prática a:", opts:["Dirigir olhando apenas o velocímetro, sem ver o nível de combustível ou luzes de alerta","Dirigir sem nenhum instrumento no painel","Usar apenas o GPS para tomar decisões","Não dirigir de forma alguma"], correct:0},
+    {q:"Como diferenciar rapidamente se um novo indicador é KPI ou KRI?", opts:["Todo indicador numérico é automaticamente um KPI","Se mede o que já aconteceu e quão bem foi executado, é KPI; se mede chance de algo ruim no futuro, é KRI","Não existe forma prática de diferenciar os dois","KRI só existe em empresas do setor financeiro"], correct:1},
+    {q:"Segundo esta aula, como KPI e KRI devem aparecer em um bom dashboard de Torre de Controle?", opts:["Sempre em telas completamente separadas","Lado a lado, no mesmo painel","Apenas o KPI deve aparecer, o KRI fica em relatório à parte","KRI deve substituir totalmente o KPI"], correct:1},
+    {q:"Um KRI genérico demais, sem capacidade de antecipar algo específico da operação, é considerado:", opts:["O modelo ideal de indicador de risco","Um erro comum na definição de indicadores, tratado nesta aula","Mais eficaz que um KRI específico","Irrelevante para a discussão desta aula"], correct:1}
+  ],
+  caso:"Uma transportadora apresenta, em sua reunião trimestral com um grande cliente de e-commerce, um SLA de entrega de 98% — número excelente, motivo de orgulho da equipe. Três semanas depois, ocorre um roubo de carga significativo em uma rota que, segundo dados internos já existentes, apresentava sinistralidade crescente havia meses — um KRI que nunca chegou a aparecer em nenhum relatório executivo, porque a empresa só acompanhava formalmente indicadores de desempenho (KPI). O caso reforça a lição central desta aula: desempenho bom e risco baixo são coisas diferentes, e só aparecem juntas no radar de quem acompanha os dois tipos de indicador.",
+  glossario:[
+    {term:"Sinistralidade", def:"Indicador que relaciona frequência e/ou custo de sinistros em determinado período ou rota."},
+    {term:"Cobertura de rastreamento", def:"Percentual de viagens monitoradas ativamente por sistema de rastreamento em tempo real."},
+    {term:"Custo por quilômetro rodado", def:"KPI que mede o custo médio de operação por unidade de distância percorrida."},
+    {term:"Exposição", def:"Grau em que uma operação está sujeita a determinado risco em um período específico."}
+  ],
+  entrevista:[
+    {q:"Qual a diferença prática entre KPI e KRI?", tip:"Use a fórmula direta: KPI mede execução (o que já aconteceu, quão bem), KRI mede exposição (chance de algo ruim acontecer). Dê um exemplo de cada."},
+    {q:"Você já viu uma situação em que um bom KPI escondeu um risco real?", tip:"Prepare um caso concreto, mesmo que hipotético baseado em experiência real — mostra pensamento crítico além da execução operacional."},
+    {q:"Como você garantiria que uma equipe não focasse só em KPI, ignorando KRI?", tip:"Fale sobre colocar os dois tipos de indicador no mesmo painel e na mesma reunião de decisão, para que nenhum dos dois seja \"esquecido\" isoladamente."}
+  ]
+},
+{
+  id:3, title:"Por que operações de e-commerce de alta escala exigem Torre de Controle estruturada", duration:"11 min", level:"Intermediário",
+  content:[
+    "Operações de e-commerce de alta escala — como as que atendem marketplaces como Shopee e Mercado Livre — têm uma característica que muda completamente a exigência sobre GRIS: <strong>volume</strong>. Não é a mesma coisa gerenciar risco em uma operação de algumas centenas de entregas por dia e em uma operação de dezenas ou centenas de milhares.",
+    "Em baixo volume, um gestor experiente consegue, na prática, \"sentir\" a operação: conhece as rotas críticas, lembra dos motoristas de maior risco, percebe padrões pela experiência acumulada. Em alta escala, essa abordagem artesanal simplesmente não escala — é fisicamente impossível para uma pessoa (ou mesmo uma equipe pequena) acompanhar manualmente milhares de entregas simultâneas com o mesmo nível de atenção.",
+    "É exatamente nesse ponto que a Torre de Controle deixa de ser um diferencial e passa a ser uma necessidade estrutural. Sem indicadores agregados, painéis por região e sistema de priorização automática, a operação de alta escala fica refém de dois cenários ruins: ou trata tudo com o mesmo nível de atenção (impossível de sustentar) ou trata tudo de forma genérica (perdendo sinais de risco específicos que importam).",
+    "Além do volume, marketplaces de grande porte impõem exigências contratuais específicas — SLA rígido, penalidades por atraso, auditorias periódicas de segurança e, cada vez mais, exigência explícita de estrutura de gestão de risco auditável. Uma transportadora que não consegue demonstrar, com dados, como monitora e trata risco em escala corre o risco real de perder contrato — não por falha operacional pontual, mas por falta de maturidade estrutural visível.",
+    "Há ainda um fator de velocidade: em operações de alta escala, o tempo entre um sinal de risco aparecer e um problema real acontecer costuma ser muito mais curto, porque o volume de viagens simultâneas aumenta a chance de qualquer padrão de risco se manifestar rapidamente em algum ponto da operação. Uma Torre de Controle bem estruturada reduz esse tempo de reação justamente onde ele mais importa: nos primeiros minutos depois que um indicador cruza o limite de alerta.",
+    "Em resumo: alta escala não é só \"mais do mesmo\" — é uma mudança de natureza do problema, que exige uma mudança correspondente na forma de gerenciar risco. É por isso que praticamente toda operação de e-commerce de grande porte no Brasil hoje trabalha, em algum grau, com o conceito de Torre de Controle."
+  ],
+  resumo:[
+    "Alto volume torna inviável a abordagem artesanal de acompanhar risco \"na experiência\" de um gestor.",
+    "Sem Torre de Controle, operações de alta escala tratam tudo igual (insustentável) ou tudo de forma genérica (perde sinal específico).",
+    "Marketplaces de grande porte exigem estrutura de risco auditável como pré-requisito contratual, não só bom desempenho operacional.",
+    "Em alta escala, o tempo entre sinal de risco e problema real tende a ser mais curto — Torre de Controle reduz o tempo de reação.",
+    "Alta escala muda a natureza do problema de gestão de risco, não só o tamanho dele."
+  ],
+  conceitos:[
+    {term:"Gestão artesanal de risco", def:"Abordagem baseada na experiência individual de um gestor, sem apoio de indicadores agregados — não escala em alto volume."},
+    {term:"Painel por região", def:"Segmentação de indicadores por área geográfica para permitir priorização mais específica."},
+    {term:"Auditoria de segurança contratual", def:"Verificação formal, feita pelo cliente, da maturidade de gestão de risco de um fornecedor."},
+    {term:"Tempo de reação", def:"Intervalo entre a identificação de um sinal de risco e a ação efetiva de resposta."}
+  ],
+  erros:[
+    "Achar que a mesma abordagem de gestão de risco usada em baixo volume escala automaticamente para alta escala.",
+    "Tratar todos os alertas com o mesmo nível de prioridade em uma operação de grande porte.",
+    "Não conseguir demonstrar, com dados, a maturidade de GRIS para um cliente auditor.",
+    "Subestimar a velocidade com que um padrão de risco se manifesta em operações de alto volume."
+  ],
+  exercicio:"Compare, em poucas linhas, como a gestão de risco mudaria entre uma operação de 200 entregas/dia e uma de 20.000 entregas/dia. O que precisaria necessariamente ser diferente, além da quantidade de pessoas na equipe?",
+  quiz:[
+    {q:"Qual é o fator central que muda a exigência de gestão de risco em operações de e-commerce de alta escala?", opts:["O tipo de veículo utilizado","O volume de entregas simultâneas","A cor da embalagem dos produtos","O horário de funcionamento da empresa"], correct:1},
+    {q:"Por que a abordagem artesanal de gestão de risco não escala em alto volume?", opts:["Porque é fisicamente impossível acompanhar manualmente milhares de entregas com o mesmo nível de atenção","Porque gestores experientes nunca funcionam bem em alta escala","Porque alta escala elimina a necessidade de qualquer gestão de risco","Porque o volume reduz automaticamente o risco"], correct:0},
+    {q:"Sem Torre de Controle estruturada, uma operação de alta escala tende a cair em quais dois cenários ruins?", opts:["Reduzir o volume de entregas ou aumentar o preço do frete","Tratar tudo com mesma atenção (insustentável) ou tudo de forma genérica (perde sinal específico)","Eliminar completamente o monitoramento ou terceirizar toda a operação","Focar apenas em KPI ou apenas em KRI, nunca nos dois"], correct:1},
+    {q:"Marketplaces de grande porte, segundo esta aula, exigem de seus parceiros logísticos:", opts:["Apenas o menor preço de frete possível","Estrutura de gestão de risco auditável, além do desempenho operacional","Nenhuma exigência relacionada a GRIS","Apenas veículos novos na frota"], correct:1},
+    {q:"O que pode fazer uma transportadora perder um contrato com um grande marketplace, segundo a aula, mesmo sem falha operacional pontual?", opts:["Falta de maturidade estrutural visível em gestão de risco","Ter frota própria em vez de terceirizada","Oferecer prazo de entrega mais curto que o concorrente","Ter sede em outra cidade"], correct:0},
+    {q:"Por que o tempo entre sinal de risco e problema real tende a ser mais curto em operações de alta escala?", opts:["Porque o volume de viagens simultâneas aumenta a chance de um padrão de risco se manifestar rapidamente em algum ponto","Porque motoristas de alta escala dirigem mais rápido","Porque alta escala elimina a necessidade de contingência","Porque o volume reduz o número de rotas de risco"], correct:0},
+    {q:"Segundo a aula, o que a Torre de Controle ajuda a reduzir especificamente em operações de alto volume?", opts:["O número de funcionários necessários na operação","O tempo de reação entre um indicador cruzar o limite de alerta e a ação de resposta","O custo total do frete","A necessidade de qualquer seguro de carga"], correct:1},
+    {q:"Como esta aula descreve a mudança causada pela alta escala na gestão de risco?", opts:["Apenas uma mudança de tamanho, sem alterar a natureza do problema","Uma mudança de natureza do problema, não só de tamanho","Uma mudança irrelevante para a estrutura de GRIS","Uma mudança que elimina a necessidade de indicadores"], correct:1},
+    {q:"Painéis segmentados por região servem principalmente para:", opts:["Reduzir o número total de indicadores acompanhados","Permitir priorização mais específica dentro de uma operação de grande volume","Substituir completamente os KRIs","Eliminar a necessidade de dashboards executivos"], correct:1},
+    {q:"Por que praticamente toda operação de e-commerce de grande porte no Brasil hoje trabalha, em algum grau, com o conceito de Torre de Controle?", opts:["Porque é uma exigência estética de marketing","Porque alto volume torna a gestão artesanal de risco inviável e os clientes exigem estrutura auditável","Porque é obrigatório por lei desde 2020","Porque reduz o preço do combustível da frota"], correct:1}
+  ],
+  caso:"Uma transportadora que atendia clientes de pequeno e médio porte fecha, pela primeira vez, um contrato de grande volume com um marketplace de e-commerce. Nos primeiros dois meses, a equipe tenta manter a mesma rotina de acompanhamento \"na experiência\" que sempre funcionou — e começa a perder visibilidade sobre padrões de risco em rotas específicas, porque o volume simplesmente ultrapassou a capacidade de atenção manual da equipe. A empresa então implementa uma Torre de Controle básica, com painéis segmentados por região e alertas automáticos por limite de indicador. Em poucas semanas, a equipe volta a identificar padrões de risco antes que virem sinistro — não porque ficou mais experiente, mas porque parou de tentar competir manualmente contra um volume que exigia estrutura, não esforço individual.",
+  glossario:[
+    {term:"Alta escala", def:"Operação com volume elevado de transações ou entregas simultâneas, que exige estrutura sistematizada em vez de acompanhamento manual."},
+    {term:"Penalidade contratual", def:"Cláusula que impõe custo financeiro ao fornecedor em caso de descumprimento de SLA ou outras exigências contratuais."},
+    {term:"Segmentação por região", def:"Divisão de indicadores e alertas por área geográfica para facilitar priorização e resposta."},
+    {term:"Maturidade estrutural", def:"Grau de organização, formalização e capacidade de evidenciar processos de gestão de risco de uma empresa."}
+  ],
+  entrevista:[
+    {q:"Por que operações de alta escala exigem uma abordagem de GRIS diferente das operações menores?", tip:"Explique que não é só \"mais do mesmo\" — é uma mudança de natureza do problema que exige estrutura, não apenas mais gente fazendo a mesma coisa manualmente."},
+    {q:"Você tem experiência com operações de grande volume, como e-commerce? Como isso mudou sua forma de gerenciar risco?", tip:"Traga um exemplo concreto de como você teve que sistematizar algo que antes era feito \"na experiência\", com números se possível."},
+    {q:"Como você demonstraria maturidade de GRIS para um cliente auditor de segurança?", tip:"Fale sobre indicadores documentados, matriz de risco formal, histórico de resultado e capacidade de mostrar dados — não apenas descrever processos informalmente."}
+  ]
+},
+{
+  id:4, title:"Os quatro pilares de uma Torre de Controle: dados, pessoas, tecnologia e governança", duration:"12 min", level:"Intermediário",
+  content:[
+    "Depois de entender o que é uma Torre de Controle e por que ela se torna indispensável em alta escala, esta aula detalha os quatro pilares que sustentam qualquer Torre de Controle funcional — na ordem em que, normalmente, precisam ser construídos.",
+    "O primeiro pilar é <strong>dados</strong>. Sem dado confiável, atualizado e íntegro, nenhum indicador tem valor real — na verdade, um indicador construído sobre dado ruim é pior do que nenhum indicador, porque gera falsa confiança na decisão. Antes de pensar em dashboard, é preciso garantir que as fontes de dado (TMS, WMS, rastreamento, telemetria) estejam realmente alimentando a Torre de Controle de forma consistente.",
+    "O segundo pilar são <strong>pessoas</strong>. Uma Torre de Controle não funciona sozinha — precisa de responsáveis claros para cada indicador, gente capaz de interpretar o que os números estão dizendo (não só olhar para eles) e uma cultura organizacional que valorize decisão baseada em dado, não em intuição isolada. É comum empresas investirem pesado em tecnologia e pouco em capacitação da equipe que vai, de fato, usar os indicadores no dia a dia.",
+    "O terceiro pilar é <strong>tecnologia</strong> — e aqui entram as ferramentas de integração de dados, plataformas de BI (como Power BI), sistemas de alerta automatizado e a infraestrutura que sustenta tudo isso funcionando em tempo real. É o pilar mais visível, mas, sozinho, é o menos eficaz dos quatro sem os outros três já estruturados.",
+    "O quarto pilar é <strong>governança</strong>: as regras que definem quem decide o quê, com que frequência os indicadores são revisados, como um novo indicador é proposto e validado, e como a Torre de Controle se conecta formalmente com outras áreas (GRIS, operação, comercial, diretoria). Sem governança, mesmo uma Torre de Controle tecnicamente bem construída tende a virar, com o tempo, um painel que ninguém mais atualiza ou revisa.",
+    "Esses quatro pilares não são etapas isoladas e sequenciais — eles se sustentam mutuamente. Dado ruim quebra a confiança das pessoas na ferramenta; falta de governança faz a tecnologia virar um projeto abandonado; ausência de pessoas capacitadas transforma bom dado em decisão ruim. Uma Torre de Controle de excelência é aquela que mantém os quatro pilares evoluindo em conjunto, não um de cada vez isoladamente."
+  ],
+  resumo:[
+    "Pilar 1 — Dados: sem dado confiável, indicador vira falsa confiança, não decisão melhor.",
+    "Pilar 2 — Pessoas: responsáveis claros, capacidade de interpretação e cultura de decisão orientada a dado.",
+    "Pilar 3 — Tecnologia: ferramentas de integração, BI e alerta — o pilar mais visível, mas o menos eficaz isoladamente.",
+    "Pilar 4 — Governança: regras de decisão, cadência de revisão e conexão formal entre áreas.",
+    "Os quatro pilares se sustentam mutuamente — nenhum deles funciona plenamente sozinho."
+  ],
+  conceitos:[
+    {term:"Dado íntegro", def:"Informação completa, consistente e sem corrupção, adequada para sustentar decisão confiável."},
+    {term:"Cultura orientada a dado", def:"Ambiente organizacional em que decisões são baseadas prioritariamente em evidência numérica, não apenas intuição."},
+    {term:"Governança de indicadores", def:"Conjunto de regras que define responsabilidade, cadência e processo de revisão dos indicadores de uma organização."},
+    {term:"Falsa confiança de indicador", def:"Sensação de segurança gerada por um indicador construído sobre dado de baixa qualidade."}
+  ],
+  erros:[
+    "Investir pesado em tecnologia (Pilar 3) sem estruturar dados, pessoas e governança antes.",
+    "Achar que um bom dashboard resolve, sozinho, a falta de cultura orientada a dado na equipe.",
+    "Não definir regras claras de governança, deixando o painel sem dono real ao longo do tempo.",
+    "Tratar os quatro pilares como fases sequenciais estanques, em vez de elementos que evoluem juntos."
+  ],
+  exercicio:"Avalie a Torre de Controle (ou estrutura equivalente) de uma operação que você conhece bem, atribuindo uma nota de 1 a 5 para cada um dos quatro pilares (dados, pessoas, tecnologia, governança). Identifique qual pilar está mais fraco e o que, especificamente, poderia ser feito para fortalecê-lo.",
+  quiz:[
+    {q:"Segundo esta aula, o que acontece quando um indicador é construído sobre dado de baixa qualidade?", opts:["O indicador se torna automaticamente mais preciso","Gera falsa confiança, o que pode ser pior do que não ter indicador algum","Não há nenhum impacto prático","O dado ruim é sempre corrigido automaticamente pela ferramenta de BI"], correct:1},
+    {q:"Qual é o segundo pilar de uma Torre de Controle, segundo esta aula?", opts:["Tecnologia","Governança","Pessoas","Marketing"], correct:2},
+    {q:"Por que investir pesado em tecnologia sem estruturar os outros pilares tende a falhar?", opts:["Porque tecnologia é sempre irrelevante para uma Torre de Controle","Porque, sozinha, tecnologia é o pilar menos eficaz sem dado, pessoas e governança já estruturados","Porque tecnologia elimina automaticamente a necessidade de governança","Porque tecnologia sempre substitui a necessidade de pessoas capacitadas"], correct:1},
+    {q:"O que caracteriza o pilar de governança em uma Torre de Controle?", opts:["Apenas a escolha da ferramenta de BI utilizada","As regras que definem quem decide o quê, cadência de revisão e conexão entre áreas","A quantidade de gráficos disponíveis no painel","O número de fontes de dado conectadas"], correct:1},
+    {q:"O que tende a acontecer com uma Torre de Controle tecnicamente bem construída, mas sem governança definida?", opts:["Ela se torna ainda mais eficaz com o tempo","Tende a virar, com o tempo, um painel que ninguém mais atualiza ou revisa","Passa a funcionar de forma totalmente automática, sem necessidade de pessoas","Nenhum impacto — governança não afeta a continuidade do painel"], correct:1},
+    {q:"Segundo esta aula, os quatro pilares (dados, pessoas, tecnologia, governança) devem ser tratados como:", opts:["Etapas isoladas e sequenciais, uma de cada vez","Elementos que se sustentam mutuamente e evoluem em conjunto","Apenas o pilar de tecnologia é realmente relevante","Pilares independentes, sem nenhuma relação entre si"], correct:1},
+    {q:"O que caracteriza uma \"cultura orientada a dado\", como descrita nesta aula?", opts:["Decisões baseadas exclusivamente na intuição da liderança","Ambiente em que decisões são baseadas prioritariamente em evidência numérica","Uma cultura que dispensa qualquer indicador formal","Uma prática exclusiva de empresas de tecnologia"], correct:1},
+    {q:"Por que é comum empresas investirem pesado em tecnologia e pouco em capacitação da equipe?", opts:["Porque tecnologia é sempre mais barata que capacitação","É apontado como um erro comum na aula, mesmo sendo frequente na prática","Porque capacitação nunca é necessária em Torres de Controle maduras","Porque a tecnologia sempre ensina a equipe automaticamente"], correct:1},
+    {q:"Qual é a relação entre falta de pessoas capacitadas e qualidade da decisão, segundo esta aula?", opts:["Ausência de pessoas capacitadas transforma bom dado em decisão ruim","Pessoas capacitadas são irrelevantes se o dado for de boa qualidade","A capacitação da equipe não impacta a qualidade da decisão final","Decisão ruim só ocorre por falha de tecnologia, nunca por falta de capacitação"], correct:0},
+    {q:"O pilar de dados é descrito nesta aula como:", opts:["O menos importante dos quatro pilares","A base sem a qual nenhum indicador tem valor real","Um pilar opcional, dependendo do tamanho da operação","Um pilar que só importa em operações internacionais"], correct:1}
+  ],
+  caso:"Uma empresa contrata uma consultoria cara para implantar uma Torre de Controle completa, com dashboards sofisticados e integração de múltiplas fontes de dado. Seis meses depois, o painel está tecnicamente impecável, mas quase ninguém na operação o consulta — não existe reunião formal para revisar os indicadores, não há responsável definido por nenhum deles, e a equipe nunca recebeu treinamento sobre como interpretar os números. A empresa percebe que investiu 100% em tecnologia (Pilar 3) e quase nada em pessoas e governança (Pilares 2 e 4). Ao criar uma reunião semanal obrigatória de indicadores, definir donos para cada métrica e treinar a equipe operacional, o mesmo painel — sem nenhuma mudança técnica — passa a gerar decisões reais pela primeira vez.",
+  glossario:[
+    {term:"Dono do indicador", def:"Pessoa formalmente responsável por acompanhar e agir sobre determinado indicador."},
+    {term:"Integração de dados", def:"Processo de unir informações de diferentes sistemas em uma base consistente e utilizável."},
+    {term:"Painel abandonado", def:"Dashboard tecnicamente funcional, mas que deixou de ser consultado ou atualizado por falta de governança ou engajamento."},
+    {term:"Capacitação orientada a dado", def:"Treinamento voltado a desenvolver a capacidade da equipe de interpretar e agir sobre indicadores."}
+  ],
+  entrevista:[
+    {q:"Quais você considera os pilares fundamentais para uma Torre de Controle funcionar de verdade?", tip:"Cite os quatro pilares (dados, pessoas, tecnologia, governança) e explique brevemente por que nenhum deles funciona plenamente sozinho."},
+    {q:"Já viu um projeto de dashboard ou indicadores fracassar? O que faltou?", tip:"Prepare um exemplo concreto — muitas vezes a resposta certa envolve falta de governança ou capacitação, não falha técnica. Isso mostra visão sistêmica, não só operacional."},
+    {q:"Se você tivesse que escolher só um pilar para fortalecer primeiro em uma Torre de Controle nova, qual seria e por quê?", tip:"Defenda uma escolha com justificativa clara (frequentemente, dados vem primeiro, porque sustenta todos os outros) — mostra raciocínio estruturado, não resposta genérica."}
+  ]
+},
+{
+  id:5, title:"🔄 De painel estático a monitoramento preditivo apoiado por IA", duration:"13 min", level:"Avançado",
+  content:[
+    "Esta aula fecha o Módulo 1 olhando para onde as Torres de Controle estão indo em 2026: da lógica de painel estático — que mostra o que já aconteceu — para uma lógica de monitoramento preditivo, que antecipa o que provavelmente vai acontecer, dando à liderança tempo real para agir antes do problema se materializar.",
+    "Um painel estático tradicional responde perguntas como \"qual foi a sinistralidade do mês passado?\" ou \"qual o SLA médio da última semana?\". São perguntas retrospectivas — úteis para entender o histórico, mas limitadas quando o objetivo é evitar que o próximo problema aconteça.",
+    "🔄 <strong>Atualização 2026.</strong> Torres de Controle mais maduras hoje incorporam camadas de análise preditiva: em vez de só mostrar o histórico de sinistralidade por rota, o sistema já projeta a probabilidade de ocorrência nas próximas semanas, considerando sazonalidade, eventos externos, mudança de padrão de carga e histórico recente. Isso transforma o dashboard de \"espelho retrovisor\" para \"radar de estrada à frente\".",
+    "Essa mudança também afeta como os alertas funcionam. Em vez de esperar um indicador cruzar um limite fixo definido manualmente (por exemplo, \"sinistralidade acima de X% dispara alerta\"), sistemas preditivos ajustam o limite de forma dinâmica, considerando o contexto — um aumento de 10% em uma rota historicamente estável pode ser mais significativo do que o mesmo aumento em uma rota já volátil por natureza.",
+    "É importante situar essa evolução com realismo: monitoramento preditivo não elimina a necessidade de julgamento humano, nem substitui os quatro pilares vistos na aula anterior. Uma previsão de IA construída sobre dado ruim (Pilar 1 fraco) ou analisada por uma equipe sem capacitação (Pilar 2 fraco) tem exatamente o mesmo problema de qualquer outro indicador mal estruturado — só que com uma camada extra de complexidade técnica.",
+    "O ponto central para levar deste curso é que a tecnologia preditiva amplifica a qualidade dos pilares que já existem — ela não os substitui. Uma Torre de Controle com dados confiáveis, pessoas capacitadas e governança clara se beneficia enormemente de camadas preditivas de IA. Uma Torre de Controle sem essa base ganha, na melhor das hipóteses, um painel mais sofisticado e igualmente pouco confiável."
+  ],
+  resumo:[
+    "Painel estático responde perguntas retrospectivas (\"o que já aconteceu\") — útil, mas limitado para prevenção.",
+    "🔄 Monitoramento preditivo (2026) projeta probabilidade de eventos futuros, considerando sazonalidade e contexto.",
+    "Alertas em sistemas preditivos podem ajustar limites dinamicamente, em vez de usar apenas um valor fixo.",
+    "IA não elimina a necessidade de julgamento humano nem substitui os quatro pilares (dados, pessoas, tecnologia, governança).",
+    "Tecnologia preditiva amplifica pilares bem estruturados — não compensa pilares fracos."
+  ],
+  conceitos:[
+    {term:"Painel retrospectivo", def:"Dashboard que mostra apenas dados e resultados de eventos que já ocorreram."},
+    {term:"Monitoramento preditivo", def:"Abordagem que projeta a probabilidade de eventos futuros com base em dados históricos e contextuais."},
+    {term:"Limite dinâmico de alerta", def:"Valor de disparo de alarme que se ajusta automaticamente conforme o contexto, em vez de permanecer fixo."},
+    {term:"Amplificação tecnológica", def:"Efeito em que uma nova tecnologia potencializa resultados de uma estrutura já sólida, mas não compensa uma estrutura fraca."}
+  ],
+  erros:[
+    "Achar que adicionar IA preditiva resolve problemas de dado ruim ou falta de governança.",
+    "Tratar previsão de IA como decisão automática, sem revisão humana em casos de maior impacto.",
+    "Usar apenas limites fixos de alerta em operações com forte variação sazonal ou contextual.",
+    "Investir em monitoramento preditivo antes de consolidar os quatro pilares básicos da Torre de Controle."
+  ],
+  exercicio:"Pense em um indicador que você já acompanhou (ou acompanha hoje) de forma puramente retrospectiva. Descreva como ele poderia ser transformado em preditivo — que dados adicionais ou contexto seriam necessários para estimar a probabilidade de um evento futuro, em vez de só registrar o que já aconteceu.",
+  quiz:[
+    {q:"O que caracteriza um painel estático tradicional, segundo esta aula?", opts:["Ele projeta eventos futuros com base em IA","Ele responde perguntas retrospectivas sobre o que já aconteceu","Ele elimina totalmente a necessidade de indicadores","Ele é usado apenas em operações de pequeno porte"], correct:1},
+    {q:"🔄 Segundo a atualização 2026, o que Torres de Controle mais maduras incorporam hoje?", opts:["Apenas relatórios financeiros mensais","Camadas de análise preditiva que projetam probabilidade de eventos futuros","Eliminação total de qualquer indicador retrospectivo","Substituição completa de equipes humanas por IA"], correct:1},
+    {q:"A mudança de painel estático para preditivo é descrita na aula como uma transição de:", opts:["\"Espelho retrovisor\" para \"radar de estrada à frente\"","\"Radar de estrada à frente\" para \"espelho retrovisor\"","Nenhuma mudança prática relevante","Uma mudança exclusiva de nomenclatura, sem efeito real"], correct:0},
+    {q:"O que é um limite dinâmico de alerta?", opts:["Um valor de disparo de alarme fixo, definido uma única vez","Um valor de disparo de alarme que se ajusta automaticamente conforme o contexto","Um tipo de indicador exclusivo de operações internacionais","Um recurso disponível apenas em ferramentas gratuitas de BI"], correct:1},
+    {q:"Por que um aumento de 10% na sinistralidade pode ter significados diferentes em rotas distintas?", opts:["Porque sinistralidade não varia entre rotas","Porque o mesmo aumento pode ser mais significativo em uma rota historicamente estável do que em uma rota já volátil","Porque rotas diferentes nunca compartilham o mesmo indicador","Porque limites de alerta sempre devem ser idênticos em todas as rotas"], correct:1},
+    {q:"Segundo esta aula, monitoramento preditivo elimina a necessidade de:", opts:["Julgamento humano e dos quatro pilares vistos na aula anterior","Nenhuma das duas coisas — ele não substitui julgamento humano nem os quatro pilares","Apenas do pilar de tecnologia","Apenas do pilar de governança"], correct:1},
+    {q:"O que acontece quando uma previsão de IA é construída sobre dado de baixa qualidade (Pilar 1 fraco)?", opts:["A previsão se torna automaticamente mais confiável","Tem o mesmo problema de qualquer indicador mal estruturado, com uma camada extra de complexidade","O problema de dado ruim deixa de existir com o uso de IA","A IA corrige automaticamente qualquer inconsistência no dado de origem"], correct:1},
+    {q:"Qual é o ponto central reforçado no fechamento desta aula sobre tecnologia preditiva?", opts:["A tecnologia preditiva substitui integralmente os quatro pilares da Torre de Controle","A tecnologia preditiva amplifica pilares bem estruturados, mas não compensa pilares fracos","A tecnologia preditiva é irrelevante para Torres de Controle maduras","Os quatro pilares deixam de ser necessários a partir de 2026"], correct:1},
+    {q:"Uma Torre de Controle sem dados confiáveis, pessoas capacitadas ou governança clara, ao adotar IA preditiva, tende a obter:", opts:["Uma solução completa e confiável automaticamente","Na melhor das hipóteses, um painel mais sofisticado e igualmente pouco confiável","A eliminação automática de todos os problemas estruturais anteriores","Resultados sempre superiores a uma Torre de Controle com os pilares bem estruturados"], correct:1},
+    {q:"O que a análise preditiva considera, além do histórico puro de sinistralidade, segundo a aula?", opts:["Apenas o valor da carga transportada","Sazonalidade, eventos externos, mudança de padrão de carga e histórico recente","Exclusivamente o número de veículos da frota","Apenas o horário de saída da viagem"], correct:1}
+  ],
+  caso:"Uma Torre de Controle madura, com os quatro pilares bem estruturados havia dois anos, implementa uma camada de análise preditiva de sinistralidade. O sistema passa a sinalizar, com uma semana de antecedência, um aumento de risco projetado em determinada região devido a um padrão sazonal identificado nos últimos três anos, combinado com um evento local programado (um grande evento público na região). A equipe, já acostumada a agir sobre indicadores retrospectivos, reforça proativamente a escolta das viagens previstas para aquela semana. O número de ocorrências na região permanece estável, mesmo com o padrão histórico apontando para um pico — não porque o risco deixou de existir, mas porque a antecipação permitiu tratamento antes do evento se manifestar. O caso ilustra o argumento central da aula: a IA preditiva funcionou porque foi construída sobre uma base já sólida dos quatro pilares.",
+  glossario:[
+    {term:"Sazonalidade", def:"Padrão de variação recorrente de um indicador associado a determinado período do ano ou calendário."},
+    {term:"Camada de análise preditiva", def:"Componente tecnológico adicional que projeta cenários futuros com base em dados históricos e contextuais."},
+    {term:"Revisão humana", def:"Etapa de validação de uma decisão ou previsão automatizada por um profissional antes da ação final."},
+    {term:"Base estrutural", def:"Conjunto dos pilares fundamentais (dados, pessoas, tecnologia, governança) que sustentam qualquer evolução tecnológica futura."}
+  ],
+  entrevista:[
+    {q:"O que você entende por monitoramento preditivo em uma Torre de Controle?", tip:"Explique a diferença entre olhar para trás (retrospectivo) e projetar o que ainda pode acontecer (preditivo), com um exemplo concreto de variável usada na previsão."},
+    {q:"Você confiaria totalmente em um alerta preditivo de IA para tomar uma decisão de reforço de segurança?", tip:"Defenda uma posição equilibrada: usar a previsão como apoio à decisão, mantendo revisão humana em casos de maior impacto — evite extremos de confiança cega ou rejeição total da tecnologia."},
+    {q:"Na sua visão, o que precisa estar pronto antes de uma empresa investir em IA preditiva para sua Torre de Controle?", tip:"Reforce que dados confiáveis, pessoas capacitadas e governança clara precisam vir primeiro — investir em IA sem essa base tende a amplificar problemas existentes, não resolvê-los."}
+  ]
+}
+];
+
+let state = { activeModule:1, activeLesson:1, done:{}, quizChecked:false };
+
+function renderManifest(){
+  const el = document.getElementById('manifest');
+  let html = `<div class="manifest-head">
+      <span class="eyebrow">Manifesto do curso</span>
+      <p>8 módulos, dos fundamentos da Torre de Controle ao projeto final. Módulo 01 disponível na íntegra.</p>
+    </div>`;
+  MODULES.forEach(m=>{
+    const active = m.n === state.activeModule ? 'active' : '';
+    html += `<button class="mod-row ${active}" onclick="selectModule(${m.n})">
+      <div class="row-top">
+        <span class="mod-num">Módulo ${String(m.n).padStart(2,'0')}</span>
+        <span class="pill ${m.live?'live':'soon'}">${m.live?'Disponível':'Em breve'}</span>
+      </div>
+      <p class="mod-title">${m.title}</p>
+    </button>`;
+    if(m.n === state.activeModule && m.live){
+      html += `<div class="lesson-list">`;
+      LESSONS.forEach(l=>{
+        const lact = l.id === state.activeLesson ? 'active':'';
+        const ldone = state.done[l.id] ? 'done':'';
+        html += `<button class="lesson-item ${lact} ${ldone}" onclick="selectLesson(${l.id})">
+          <span class="lesson-dot">${state.done[l.id]?'<i>✓</i>':''}</span>
+          <span>Aula ${l.id} — ${l.title}</span>
+        </button>`;
+      });
+      html += `</div>`;
+    }
+  });
+  el.innerHTML = html;
+}
+
+function renderLocked(mod){
+  const chips = mod.topics.map(t=>`<div class="topic-chip">${t}</div>`).join('');
+  document.getElementById('main').innerHTML = `
+    <div class="locked-doc">
+      <span class="eyebrow">Módulo ${String(mod.n).padStart(2,'0')} · Estrutura do curso</span>
+      <h2>${mod.title}</h2>
+      <p>Este módulo faz parte da estrutura completa do curso e segue o mesmo padrão do Módulo 01: aulas em microformato, resumo, conceitos-chave, erros comuns, exercício prático, quiz de 10 perguntas, estudo de caso e preparação para entrevista.</p>
+      <div class="topics-grid">${chips}</div>
+      <div class="lock-note"><span>&#9679;</span> Conteúdo completo liberado nas próximas entregas do curso</div>
+    </div>`;
+}
+
+function renderLesson(l){
+  const conceptCards = l.conceitos.map(c=>`<div class="concept-card"><p class="term">${c.term}</p><p class="def">${c.def}</p></div>`).join('');
+  const erroBoxes = l.erros.map(e=>`<div class="warn-box"><p><strong>Erro comum —</strong> ${e}</p></div>`).join('');
+  const glossary = l.glossario.map(g=>`<div class="glossary-item"><p class="g-term">${g.term}</p><p class="g-def">${g.def}</p></div>`).join('');
+  const interview = l.entrevista.map(q=>`<div class="interview-item"><p class="interview-q">${q.q}</p><p class="interview-a">${q.tip}</p></div>`).join('');
+  const quizItems = l.quiz.map((q,qi)=>{
+    const opts = q.opts.map((o,oi)=>`<label class="quiz-opt" data-qi="${qi}" data-oi="${oi}">
+        <input type="radio" name="q${qi}" value="${oi}"><span>${o}</span>
+      </label>`).join('');
+    return `<div class="quiz-item">
+        <p class="quiz-q"><span>${String(qi+1).padStart(2,'0')}</span>${q.q}</p>
+        ${opts}
+      </div>`;
+  }).join('');
+
+  document.getElementById('main').innerHTML = `
+    <div class="doc">
+      <span class="eyebrow">Aula ${String(l.id).padStart(2,'0')} · Módulo 01 — Fundamentos da Torre de Controle</span>
+      <h2 class="display">${l.title}</h2>
+      <div class="doc-meta">
+        <div>Duração<strong>${l.duration}</strong></div>
+        <div>Nível<strong>${l.level}</strong></div>
+        <div>Formato<strong>Microaula + prática</strong></div>
+      </div>
+      ${l.content.map(p=>`<p>${p}</p>`).join('')}
+
+      <p class="section-label">Resumo</p>
+      <ul class="doc-list">${l.resumo.map(r=>`<li>${r}</li>`).join('')}</ul>
+
+      <p class="section-label">Conceitos-chave</p>
+      <div class="concept-grid">${conceptCards}</div>
+
+      <p class="section-label">Erros mais comuns</p>
+      ${erroBoxes}
+
+      <p class="section-label">Exercício prático</p>
+      <div class="task-box"><p>${l.exercicio}</p></div>
+
+      <p class="section-label">Quiz — 10 perguntas</p>
+      <div id="quiz-body">${quizItems}</div>
+      <div class="quiz-actions">
+        <button class="btn-check" onclick="checkQuiz()">Corrigir quiz</button>
+        <span id="quiz-score"></span>
+      </div>
+
+      <p class="section-label">Estudo de caso</p>
+      <div class="case-box"><span class="eyebrow">Cenário real de operação</span><p>${l.caso}</p></div>
+
+      <p class="section-label">Glossário</p>
+      ${glossary}
+
+      <p class="section-label">Perguntas de entrevista</p>
+      ${interview}
+    </div>`;
+
+  state.done[l.id] = true;
+  updateRadar();
+  renderManifest();
+}
+
+function checkQuiz(){
+  const lesson = LESSONS.find(l=>l.id===state.activeLesson);
+  let correctCount = 0;
+  lesson.quiz.forEach((q,qi)=>{
+    const selected = document.querySelector(`input[name="q${qi}"]:checked`);
+    const opts = document.querySelectorAll(`.quiz-opt[data-qi="${qi}"]`);
+    opts.forEach(o=>{
+      const oi = parseInt(o.getAttribute('data-oi'));
+      o.classList.remove('correct','wrong');
+      if(oi === q.correct){ o.classList.add('correct'); }
+      else if(selected && parseInt(selected.value) === oi){ o.classList.add('wrong'); }
+    });
+    if(selected && parseInt(selected.value) === q.correct) correctCount++;
+  });
+  document.getElementById('quiz-score').innerHTML = `Resultado: <strong>${correctCount}/10</strong> respostas corretas`;
+}
+
+function updateRadar(){
+  const total = LESSONS.length;
+  const doneCount = Object.keys(state.done).length;
+  const circumference = 169.6;
+  const offset = circumference - (circumference * (doneCount/total));
+  document.getElementById('ring-fg').style.strokeDashoffset = offset;
+  document.getElementById('ring-label').textContent = doneCount + '/' + total;
+  document.getElementById('progress-text').textContent = doneCount === 0
+    ? 'Nenhuma aula concluída'
+    : (doneCount === total ? 'Módulo 01 concluído' : doneCount + ' de ' + total + ' aulas vistas');
+}
+
+function selectModule(n){
+  state.activeModule = n;
+  const mod = MODULES.find(m=>m.n===n);
+  if(mod.live){
+    if(!LESSONS.find(l=>l.id===state.activeLesson)) state.activeLesson = 1;
+    renderManifest();
+    renderLesson(LESSONS.find(l=>l.id===state.activeLesson));
+  } else {
+    renderManifest();
+    renderLocked(mod);
+  }
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function selectLesson(id){
+  state.activeLesson = id;
+  renderManifest();
+  renderLesson(LESSONS.find(l=>l.id===id));
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+renderManifest();
+renderLesson(LESSONS[0]);
+</script>
+</body>
+</html>
