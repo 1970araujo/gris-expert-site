@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Central de Gerenciamento de Riscos no Transporte Rodoviário — GRIS.EXPERT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#0D2B45; --navy-800:#0A2138; --navy-900:#071726; --navy-700:#16385A; --navy-line:#26496B;
+    --gold:#C9A84C; --gold-dim:#8C6F2E; --gold-soft:#E4D3A0;
+    --paper:#F3EFE6; --paper-line:#DED5B8; --ink:#20211C; --ink-soft:#585648;
+    --rust:#A63D2F; --rust-soft:#F1DCD6; --ok:#3F6B4B; --ok-soft:#DCE8DD; --slate:#8FA4B8;
+    --update:#2E5C8A; --update-soft:#DCE7F1;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{background:var(--navy-900);color:var(--paper);font-family:'IBM Plex Sans',sans-serif;-webkit-font-smoothing:antialiased;}
+  .eyebrow{font-family:'IBM Plex Mono',monospace;letter-spacing:.14em;text-transform:uppercase;font-size:11px;color:var(--gold);}
+  .display{font-family:'Big Shoulders Display',sans-serif;text-transform:uppercase;font-weight:800;letter-spacing:.01em;}
+
+  header.console{background:linear-gradient(180deg,var(--navy-800),var(--navy));border-bottom:1px solid var(--navy-line);
+    padding:22px 32px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;}
+  .brandmark{display:flex;align-items:center;gap:16px;}
+  .brandmark .mark{width:46px;height:46px;border:1.5px solid var(--gold);border-radius:50%;position:relative;flex:none;}
+  .brandmark .mark::before{content:"";position:absolute;width:26px;height:26px;top:9px;left:9px;border:1px solid var(--gold-dim);border-radius:50%;}
+  .brandmark .mark::after{content:"";position:absolute;top:20px;left:20px;width:5px;height:5px;background:var(--gold);border-radius:50%;}
+  .brandmark h1{font-family:'Big Shoulders Display',sans-serif;font-weight:800;font-size:20px;letter-spacing:.03em;margin:0;color:var(--paper);text-transform:uppercase;}
+  .brandmark h1 span{color:var(--gold);}
+  .brandmark p{margin:2px 0 0;font-size:12.5px;color:var(--slate);}
+  .back-link{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--slate);text-decoration:none;text-transform:uppercase;letter-spacing:.05em;}
+  .back-link:hover{color:var(--gold);}
+
+  .radar-wrap{display:flex;align-items:center;gap:14px;}
+  .radar{position:relative;width:60px;height:60px;flex:none;}
+  .radar svg{width:100%;height:100%;transform:rotate(-90deg);}
+  .radar .ring-bg{fill:none;stroke:var(--navy-line);stroke-width:5;}
+  .radar .ring-fg{fill:none;stroke:var(--gold);stroke-width:5;stroke-linecap:round;transition:stroke-dashoffset .6s ease;}
+  .radar .rlabel{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--gold);}
+  .radar-text .t1{font-size:11.5px;color:var(--slate);margin:0;}
+  .radar-text .t2{font-size:13.5px;color:var(--paper);margin:0;font-weight:500;}
+
+  .shell{display:grid;grid-template-columns:300px 1fr;min-height:calc(100vh - 92px);}
+  @media (max-width:860px){.shell{grid-template-columns:1fr;}}
+
+  aside.manifest{background:var(--navy-800);border-right:1px solid var(--navy-line);padding:22px 0 40px;}
+  .manifest-head{padding:0 22px 16px;border-bottom:1px solid var(--navy-line);margin-bottom:6px;}
+  .manifest-head p{margin:0;font-size:13px;color:var(--slate);line-height:1.5;}
+
+  .mod-row{display:block;width:100%;text-align:left;background:none;border:none;cursor:pointer;
+    padding:13px 22px;color:var(--paper);border-bottom:1px solid var(--navy-line);font-family:inherit;}
+  .mod-row:hover{background:var(--navy-700);}
+  .mod-row.active{background:var(--navy-700);box-shadow:inset 3px 0 0 var(--gold);}
+  .mod-row .row-top{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+  .mod-num{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--gold);}
+  .mod-title{font-size:13.5px;font-weight:500;margin:3px 0 0;line-height:1.3;}
+  .pill{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.06em;padding:3px 8px;border-radius:20px;text-transform:uppercase;flex:none;}
+  .pill.live{background:rgba(201,168,76,.16);color:var(--gold);border:1px solid var(--gold-dim);}
+  .pill.soon{background:transparent;color:var(--slate);border:1px solid var(--navy-line);}
+
+  .lesson-list{margin-top:10px;padding-left:2px;}
+  .lesson-item{display:flex;align-items:center;gap:10px;width:100%;background:none;border:none;cursor:pointer;
+    color:var(--slate);font-family:inherit;font-size:12.5px;padding:8px 4px 8px 10px;text-align:left;border-left:2px solid transparent;}
+  .lesson-item:hover{color:var(--paper);}
+  .lesson-item.active{color:var(--gold);border-left-color:var(--gold);}
+  .lesson-dot{width:16px;height:16px;border-radius:50%;border:1.5px solid var(--navy-line);flex:none;display:flex;align-items:center;justify-content:center;font-size:9px;color:transparent;}
+  .lesson-item.done .lesson-dot{border-color:var(--gold);background:var(--gold);color:var(--navy-900);}
+  .lesson-item.active .lesson-dot{border-color:var(--gold);}
+
+  main{padding:40px 44px 90px;}
+  @media (max-width:640px){main{padding:28px 18px 70px;}}
+
+  .doc{background:var(--paper);color:var(--ink);border-radius:6px;max-width:840px;margin:0 auto;padding:44px 48px 56px;border:1px solid var(--paper-line);}
+  @media (max-width:640px){.doc{padding:28px 22px 40px;}}
+  .doc .eyebrow{color:var(--gold-dim);}
+  .doc h2.display{font-size:clamp(28px,4vw,40px);color:var(--navy);margin:8px 0 22px;line-height:1.08;}
+  .doc-meta{display:flex;gap:18px;flex-wrap:wrap;margin:0 0 26px;padding-bottom:22px;border-bottom:1px solid var(--paper-line);}
+  .doc-meta div{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--ink-soft);}
+  .doc-meta strong{display:block;color:var(--ink);font-family:'IBM Plex Sans',sans-serif;font-size:13.5px;font-weight:500;margin-top:2px;}
+  .doc p{font-size:16px;line-height:1.75;margin:0 0 18px;color:var(--ink);}
+  .doc p strong{color:var(--navy);}
+
+  .update-box{background:var(--update-soft);border-left:3px solid var(--update);border-radius:0 4px 4px 0;padding:14px 18px;margin:0 0 18px;}
+  .update-box p{margin:0;font-size:14.5px;color:#1C3A57;line-height:1.6;}
+  .update-box .utag{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--update);display:block;margin-bottom:6px;}
+
+  .section-label{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--navy);margin:40px 0 14px;padding-top:22px;border-top:1px solid var(--paper-line);display:flex;align-items:center;gap:10px;}
+  .section-label::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--gold);flex:none;}
+
+  ul.doc-list{margin:0 0 6px;padding-left:0;list-style:none;}
+  ul.doc-list li{position:relative;padding:6px 0 6px 22px;font-size:15px;line-height:1.6;color:var(--ink);}
+  ul.doc-list li::before{content:"—";position:absolute;left:0;color:var(--gold-dim);}
+
+  .concept-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:6px;}
+  @media (max-width:640px){.concept-grid{grid-template-columns:1fr;}}
+  .concept-card{background:#fff;border:1px solid var(--paper-line);border-radius:4px;padding:14px 16px;}
+  .concept-card .term{font-weight:600;color:var(--navy);font-size:14px;margin:0 0 4px;}
+  .concept-card .def{font-size:13.5px;color:var(--ink-soft);margin:0;line-height:1.5;}
+
+  .warn-box{background:var(--rust-soft);border-left:3px solid var(--rust);border-radius:0 4px 4px 0;padding:12px 16px;margin-bottom:10px;}
+  .warn-box p{margin:0;font-size:14.5px;color:#5A231C;line-height:1.55;}
+  .warn-box p strong{color:#5A231C;}
+
+  .task-box{background:#fff;border:1px dashed var(--gold-dim);border-radius:4px;padding:20px 22px;}
+  .task-box p{margin:0;font-size:15px;}
+
+  .case-box{background:var(--navy);color:var(--paper);border-radius:4px;padding:24px 26px;}
+  .case-box p{color:var(--paper);font-size:15px;line-height:1.7;margin:0;}
+  .case-box .eyebrow{color:var(--gold);margin-bottom:8px;display:block;}
+
+  .quiz-item{margin-bottom:22px;padding-bottom:20px;border-bottom:1px solid var(--paper-line);}
+  .quiz-item:last-child{border-bottom:none;}
+  .quiz-q{font-size:15px;font-weight:500;color:var(--navy);margin:0 0 10px;}
+  .quiz-q span{font-family:'IBM Plex Mono',monospace;color:var(--gold-dim);margin-right:8px;}
+  .quiz-opt{display:flex;align-items:flex-start;gap:10px;padding:9px 12px;border:1px solid var(--paper-line);border-radius:4px;margin-bottom:8px;cursor:pointer;background:#fff;font-size:14px;line-height:1.4;}
+  .quiz-opt:hover{border-color:var(--gold-dim);}
+  .quiz-opt input{margin-top:2px;accent-color:var(--gold-dim);flex:none;}
+  .quiz-opt.correct{background:var(--ok-soft);border-color:var(--ok);}
+  .quiz-opt.wrong{background:var(--rust-soft);border-color:var(--rust);}
+  .quiz-actions{display:flex;align-items:center;gap:16px;margin-top:24px;}
+  .btn-check{font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.06em;font-size:12.5px;background:var(--navy);color:var(--gold);border:none;padding:12px 26px;border-radius:3px;cursor:pointer;}
+  .btn-check:hover{background:var(--navy-700);}
+  #quiz-score{font-size:14px;color:var(--ink-soft);}
+  #quiz-score strong{color:var(--navy);}
+
+  .glossary-item{padding:10px 0;border-bottom:1px solid var(--paper-line);}
+  .glossary-item:last-child{border-bottom:none;}
+  .glossary-item .g-term{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--gold-dim);text-transform:uppercase;letter-spacing:.03em;}
+  .glossary-item .g-def{font-size:14.5px;margin:3px 0 0;color:var(--ink);}
+
+  .interview-item{margin-bottom:16px;}
+  .interview-q{font-size:15px;font-weight:500;color:var(--navy);margin:0 0 6px;}
+  .interview-a{font-size:14.5px;color:var(--ink-soft);margin:0;line-height:1.6;padding-left:14px;border-left:2px solid var(--gold-soft);}
+
+  .locked-doc{max-width:840px;margin:0 auto;}
+  .locked-doc .eyebrow{color:var(--gold);}
+  .locked-doc h2{font-family:'Big Shoulders Display',sans-serif;font-weight:800;text-transform:uppercase;color:var(--paper);font-size:clamp(26px,4vw,36px);margin:10px 0 16px;}
+  .locked-doc>p{color:var(--slate);font-size:15px;line-height:1.7;max-width:620px;margin:0 0 30px;}
+  .topics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;}
+  .topic-chip{border:1px solid var(--navy-line);border-radius:4px;padding:12px 14px;font-size:13.5px;color:var(--paper);background:var(--navy-800);}
+  .lock-note{margin-top:34px;display:flex;align-items:center;gap:10px;color:var(--gold);font-size:13px;font-family:'IBM Plex Mono',monospace;}
+
+  footer.console-foot{text-align:center;padding:26px;color:var(--slate);font-size:12px;border-top:1px solid var(--navy-line);font-family:'IBM Plex Mono',monospace;}
+  footer.console-foot span{color:var(--gold);}
+</style>
+</head>
+<body>
+
+<header class="console">
+  <div class="brandmark">
+    <div class="mark"></div>
+    <div>
+      <h1>GRIS<span>.EXPERT</span></h1>
+      <p>Central de Gerenciamento de Riscos no Transporte Rodoviário de Cargas — Edição 2026</p>
+    </div>
+  </div>
+  <div class="radar-wrap">
+    <a class="back-link" href="../cursos.html">← Voltar ao catálogo</a>
+    <div class="radar">
+      <svg viewBox="0 0 64 64">
+        <circle class="ring-bg" cx="32" cy="32" r="27"></circle>
+        <circle id="ring-fg" class="ring-fg" cx="32" cy="32" r="27" stroke-dasharray="169.6" stroke-dashoffset="169.6"></circle>
+      </svg>
+      <div class="rlabel" id="ring-label">0/5</div>
+    </div>
+    <div class="radar-text">
+      <p class="t1">Progresso — Módulo 01</p>
+      <p class="t2" id="progress-text">Nenhuma aula concluída</p>
+    </div>
+  </div>
+</header>
+
+<div class="shell">
+  <aside class="manifest" id="manifest"></aside>
+  <main id="main"></main>
+</div>
+
+<footer class="console-foot">GRIS.EXPERT — <span>Central de Gerenciamento de Riscos no Transporte Rodoviário de Cargas</span> — edição 2026, com atualizações regulatórias e tecnológicas assinaladas</footer>
+
+<script>
+const MODULES = [
+  {n:1, title:"Fundamentos e Evolução da Central de Gerenciamento de Riscos", live:true,
+   topics:["História do GRIS no transporte rodoviário","As cinco fases da evolução tecnológica","O papel estratégico da CGR","Funções essenciais da CGR","🔄 De central reativa a preditiva"]},
+  {n:2, title:"Estrutura Física e Tecnológica da Central", live:false,
+   topics:["Infraestrutura de uma central 24x7","Tecnologias centrais: rastreamento, CFTV, cercas eletrônicas","Integração de plataformas via API","Cibersegurança de centrais de monitoramento","Sala de crise e sala de treinamento"]},
+  {n:3, title:"Organograma, Cargos e Responsabilidades", live:false,
+   topics:["Auxiliar de Monitoramento","Operador de Monitoramento","Analista de Gerenciamento de Riscos","Supervisor e Coordenador","Gerente de Gerenciamento de Riscos"]},
+  {n:4, title:"Divisões Internas e Fluxo Operacional Integrado", live:false,
+   topics:["Monitoramento Operacional e Inteligência de Riscos","Cadastro, Validação e Controle Operacional","Gestão de Sinistros e Pronta Resposta","Qualidade, Auditoria e Compliance","Panorama regulatório 2026 (ANTT, LGPD, Decreto 13.012/2026)"]},
+  {n:5, title:"Operação Diária: Fluxos, Protocolos e Contingência", live:false,
+   topics:["Fluxo de uma viagem monitorada","Protocolos de contingência","Tratamento de alarmes","Rastreadores, iscas, bloqueadores e escoltas","Integradores de tecnologia (Buonny, Opentech, BRK, CCI, Tecnorisk)"]},
+  {n:6, title:"Indicadores, Qualidade e Melhoria Contínua", live:false,
+   topics:["Os quatro pilares da central de excelência","KPIs essenciais de uma CGR","Dashboards executivos","Analytics preditivo aplicado a rotas","Auditoria interna e melhoria contínua"]},
+  {n:7, title:"Estudos de Caso e Simulações Reais", live:false,
+   topics:["Roubo de carga evitado por tratamento correto de alarme","Falha de comunicação central-motorista","Gestão de crise em sinistro de grande impacto","Simulação: turno de Operador","Simulação: crise sob a ótica do Gerente"]},
+  {n:8, title:"Carreira e Preparação para Processos Seletivos", live:false,
+   topics:["Trajetória de carreira na CGR","Como apresentar experiência de central em entrevista","Perguntas por cargo","Traduzindo indicadores em resultado financeiro","Projeto Final: desenho completo de uma CGR"]},
+];
+
+const LESSONS = [
+{
+  id:1, title:"História do Gerenciamento de Riscos no transporte rodoviário brasileiro", duration:"11 min", level:"Introdutório",
+  content:[
+    "Por muito tempo, gerenciar risco no transporte rodoviário significava basicamente uma coisa: contratar um seguro e torcer para não precisar usá-lo. A atuação era reativa — a empresa só descobria que tinha um problema depois que o sinistro já tinha acontecido, quando restava apenas acionar a apólice e contabilizar o prejuízo.",
+    "Esse cenário começou a mudar de forma mais concreta a partir do crescimento do roubo de cargas no Brasil e da profissionalização das organizações criminosas especializadas nesse tipo de crime. Diante de perdas cada vez maiores e mais frequentes, ficou claro que depender só de seguro não era suficiente — era preciso agir antes do sinistro, não só depois.",
+    "Foi nesse contexto que nasceu a lógica da <strong>Central de Gerenciamento de Riscos (CGR)</strong>: em vez de esperar o problema acontecer, transportadoras e gerenciadoras de risco passaram a monitorar viagens de forma contínua, acompanhando rotas, horários e comportamento do motorista para identificar sinais de risco antes que se tornassem sinistro.",
+    "A partir da década de 1990, essa mudança ganhou força com a chegada de tecnologias de rastreamento via satélite e monitoramento remoto — antes disso, o controle de uma viagem dependia basicamente de telefone e rádio, com pouquíssima visibilidade real sobre o que estava acontecendo na estrada.",
+    "Esse movimento histórico não foi só tecnológico. Junto com o rastreamento vieram protocolos de contingência formais, integração entre transportadoras, seguradoras e empresas especializadas em segurança, e uma mudança cultural importante: a ideia de que gerenciar risco é uma função contínua, não um evento isolado que só existe quando algo dá errado.",
+    "Hoje, a Central de Gerenciamento de Riscos deixou de ser um simples posto de observação e se tornou o que este curso vai chamar, ao longo dos próximos módulos, de <strong>centro de inteligência operacional</strong> — capaz de acompanhar milhares de viagens ao mesmo tempo, cruzar dados em tempo real e coordenar respostas rápidas para reduzir perdas antes que elas se tornem irreversíveis."
+  ],
+  resumo:[
+    "Até os anos 1990, gestão de risco no transporte era majoritariamente reativa: seguro contratado, sinistro contabilizado depois.",
+    "O crescimento do roubo de cargas profissionalizado tornou a atuação puramente reativa insustentável.",
+    "A CGR nasceu da lógica de monitorar continuamente para agir antes do sinistro, não só depois.",
+    "Rastreamento via satélite (anos 1990) foi o marco tecnológico que tornou esse monitoramento contínuo viável.",
+    "A central evoluiu de posto de observação para centro de inteligência operacional."
+  ],
+  conceitos:[
+    {term:"Gestão reativa de risco", def:"Modelo em que a empresa só age depois que o sinistro já ocorreu."},
+    {term:"Gestão preventiva de risco", def:"Modelo em que a empresa monitora continuamente para agir antes do sinistro se materializar."},
+    {term:"CGR", def:"Central de Gerenciamento de Riscos — estrutura responsável pelo monitoramento contínuo de viagens e riscos operacionais."},
+    {term:"Centro de inteligência operacional", def:"Evolução da CGR que cruza dados de múltiplas fontes em tempo real para antecipar e responder a riscos."}
+  ],
+  erros:[
+    "Achar que gestão de risco no transporte sempre foi feita da forma estruturada como é hoje — é uma evolução recente.",
+    "Tratar a CGR como um posto de observação passivo, sem função de decisão.",
+    "Ignorar que a mudança histórica foi tanto tecnológica quanto cultural — não basta ter rastreador, é preciso mudar a lógica de atuação.",
+    "Confundir contratação de seguro com gestão de risco propriamente dita."
+  ],
+  exercicio:"Descreva, em poucas linhas, como seria o dia de um responsável por acompanhar uma viagem de carga antes da existência de rastreamento via satélite (usando só telefone e rádio). Depois, compare com o que um Operador de Monitoramento faz hoje. O contraste ajuda a entender por que a CGR se tornou uma função estratégica, e não apenas operacional.",
+  quiz:[
+    {q:"Antes da profissionalização da gestão de riscos, qual era a abordagem predominante das empresas de transporte?", opts:["Monitoramento preventivo contínuo","Contratar seguro e agir apenas depois do sinistro","Uso de Inteligência Artificial para prever rotas de risco","Rastreamento via satélite obrigatório por lei"], correct:1},
+    {q:"O que impulsionou a mudança de uma postura reativa para uma postura preventiva no setor?", opts:["Redução do custo de combustível","Crescimento e profissionalização do roubo de cargas","Fim da exigência de seguro obrigatório","Queda no valor médio das cargas transportadas"], correct:1},
+    {q:"A partir de qual década o rastreamento via satélite começou a ganhar força no Brasil?", opts:["1970","1980","1990","2010"], correct:2},
+    {q:"Antes do rastreamento via satélite, o controle de uma viagem dependia principalmente de:", opts:["Sensores de IoT","Telefone e rádio","Aplicativos de geolocalização","Câmeras de CFTV embarcadas"], correct:1},
+    {q:"O que caracteriza a gestão preventiva de risco, em oposição à reativa?", opts:["Agir somente depois que o sinistro ocorre","Monitorar continuamente para agir antes do sinistro se materializar","Depender exclusivamente da apólice de seguro","Eliminar totalmente a necessidade de seguro"], correct:1},
+    {q:"Como este curso define a evolução mais recente da Central de Gerenciamento de Riscos?", opts:["De centro de inteligência operacional para posto de observação","De posto de observação passivo para centro de inteligência operacional","Não houve evolução relevante nas últimas décadas","De função estratégica para função puramente administrativa"], correct:1},
+    {q:"A mudança histórica na gestão de riscos no transporte foi, segundo a aula:", opts:["Apenas tecnológica","Apenas cultural, sem relação com tecnologia","Tecnológica e cultural ao mesmo tempo","Apenas regulatória, imposta por lei"], correct:2},
+    {q:"Contratar um seguro de carga é, por si só:", opts:["Sinônimo completo de gestão de risco","Uma parte da gestão de risco, mas não substitui o monitoramento preventivo","Uma prática já abandonada pelo mercado","Obrigatório apenas para cargas de baixo valor"], correct:1},
+    {q:"Por que a profissionalização de organizações criminosas tornou a postura puramente reativa insustentável?", opts:["Porque reduziu o valor médio dos sinistros","Porque aumentou a frequência e a sofisticação dos roubos de carga","Porque eliminou a necessidade de seguro","Porque tornou o rastreamento via satélite obrigatório"], correct:1},
+    {q:"O conceito de \"centro de inteligência operacional\", usado neste curso, descreve uma central capaz de:", opts:["Apenas registrar sinistros já ocorridos","Acompanhar múltiplas viagens simultaneamente e cruzar dados em tempo real para antecipar riscos","Substituir integralmente a função dos motoristas","Atuar exclusivamente na área jurídica da empresa"], correct:1}
+  ],
+  caso:"Uma transportadora de médio porte, no início dos anos 2000, ainda operava seu controle de viagens por telefone: o motorista ligava em pontos de parada pré-combinados para informar sua posição. Depois de um roubo de carga em uma dessas janelas sem contato, a empresa investiu em rastreamento via satélite e criou uma pequena sala de monitoramento com dois operadores. Em menos de um ano, o tempo médio de resposta a uma ocorrência caiu de horas para minutos — não porque o risco na estrada tivesse diminuído, mas porque a empresa passou a enxergar o risco antes de ele se tornar sinistro. Esse é, em escala reduzida, o mesmo movimento histórico que deu origem às centrais de gerenciamento de risco modernas.",
+  glossario:[
+    {term:"Sinistro", def:"Evento de risco que já se materializou, gerando perda efetiva."},
+    {term:"Apólice", def:"Documento que formaliza a cobertura de um contrato de seguro."},
+    {term:"Monitoramento remoto", def:"Acompanhamento de uma operação a distância, geralmente via tecnologia de rastreamento."},
+    {term:"Organização criminosa especializada", def:"Grupo estruturado e recorrente na prática de determinado tipo de crime, como o roubo de cargas."}
+  ],
+  entrevista:[
+    {q:"Como você explicaria, para alguém de fora da área, a diferença entre gestão de risco reativa e preventiva no transporte?", tip:"Use o contraste histórico: antes, a empresa só sabia do problema depois do prejuízo; hoje, o monitoramento contínuo permite agir antes. Frase curta, exemplo direto."},
+    {q:"Por que a chegada do rastreamento via satélite foi um marco tão importante para o setor?", tip:"Destaque que não foi só uma mudança de ferramenta, mas de lógica de atuação — de esperar o problema para antecipar o risco."},
+    {q:"Na sua visão, uma central de monitoramento hoje é só um posto de observação ou algo mais?", tip:"Responda com o conceito de centro de inteligência operacional — mostra que você entende o papel estratégico, não só operacional, da função."}
+  ]
+},
+{
+  id:2, title:"As cinco fases da evolução tecnológica — do rádio à Inteligência Artificial", duration:"12 min", level:"Introdutório",
+  content:[
+    "Entender a evolução tecnológica da gestão de riscos no transporte não é só uma curiosidade histórica — é o que ajuda a explicar por que uma central de monitoramento hoje é organizada do jeito que é, e para onde ela está caminhando. O manual original desta central identifica cinco fases dessa evolução, e vale conhecer cada uma em detalhe.",
+    "A <strong>primeira fase</strong> é o controle manual por telefone e rádio. Nessa fase, a visibilidade sobre a viagem dependia inteiramente do contato direto — sem posição em tempo real, sem histórico automático, sem alerta automatizado. Qualquer desvio de rota só era percebido se o motorista relatasse, ou se ele simplesmente não aparecesse no horário combinado.",
+    "A <strong>segunda fase</strong> é o rastreamento por satélite e GPS, que trouxe, pela primeira vez, posição real da viagem em tempo real, sem depender do relato do motorista. Essa fase já permitia identificar desvios de rota automaticamente, mas ainda operava de forma isolada — cada sistema de rastreamento funcionava separado dos outros.",
+    "A <strong>terceira fase</strong> é a integração de plataformas de monitoramento, unindo diferentes tecnologias (rastreamento, CFTV, controle de acesso) em um único painel de acompanhamento. É nessa fase que a central deixa de ser apenas \"vários sistemas separados na mesma sala\" e passa a operar como um ambiente integrado de fato.",
+    "A <strong>quarta fase</strong> é a telemetria embarcada e a análise de comportamento do motorista — frenagens bruscas, excesso de velocidade, tempo de direção contínua. Aqui a central passa a enxergar não só onde o veículo está, mas como ele está sendo conduzido, o que abre espaço para prevenção de acidentes, e não só de crimes.",
+    "🔄 <strong>Atualização 2026 — a quinta fase, hoje.</strong> A quinta fase, descrita originalmente como \"Inteligência Artificial, análise preditiva e automação de decisões\", deixou de ser tendência e passou a ser realidade operacional em centrais mais maduras: algoritmos que cruzam histórico de sinistros, horário, tipo de carga e comportamento do motorista para classificar automaticamente o nível de risco de cada viagem — e, em alguns casos, já sugerem ou até disparam ações preventivas antes de qualquer intervenção humana. Isso não elimina a função do operador; muda o papel dele de \"quem observa tudo manualmente\" para \"quem decide diante do que a IA já triou e priorizou\"."
+  ],
+  resumo:[
+    "Fase 1: controle manual por telefone e rádio, sem visibilidade em tempo real.",
+    "Fase 2: rastreamento por satélite/GPS, com posição real da viagem, mas sistemas isolados.",
+    "Fase 3: integração de plataformas em um único painel de monitoramento.",
+    "Fase 4: telemetria embarcada e análise de comportamento do motorista, ampliando o foco para prevenção de acidentes.",
+    "🔄 Fase 5 (atualização 2026): IA e análise preditiva já operacionais, mudando o papel do operador de observador para tomador de decisão apoiado por triagem automática."
+  ],
+  conceitos:[
+    {term:"Telemetria embarcada", def:"Coleta de dados do próprio veículo (velocidade, frenagem, comportamento de condução) por sensores instalados nele."},
+    {term:"Integração de plataformas", def:"União de diferentes sistemas de monitoramento em um único ambiente operacional."},
+    {term:"Análise preditiva", def:"Uso de dados históricos e algoritmos para estimar a probabilidade de um evento futuro, como um sinistro."},
+    {term:"Triagem automática de risco", def:"Classificação automatizada do nível de risco de uma viagem, feita por sistema em vez de análise manual."}
+  ],
+  erros:[
+    "Achar que a fase 5 (IA) substitui integralmente o operador humano — na prática, ela muda o papel dele, não o elimina.",
+    "Tratar rastreamento por GPS (fase 2) como sinônimo de central de monitoramento madura — é só uma das cinco fases.",
+    "Ignorar a telemetria comportamental como ferramenta de prevenção de acidentes, focando só em prevenção de crime.",
+    "Supor que todas as centrais brasileiras já operam na fase 5 — a maturidade tecnológica ainda varia muito entre empresas."
+  ],
+  exercicio:"Classifique a central de monitoramento da sua empresa atual (ou da última em que você atuou) em uma das cinco fases descritas nesta aula. Justifique com pelo menos duas evidências concretas (tecnologias usadas, forma de tratar alarmes, nível de automação nas decisões).",
+  quiz:[
+    {q:"Qual é a característica central da Fase 1 da evolução tecnológica da CGR?", opts:["Uso de Inteligência Artificial","Controle manual por telefone e rádio, sem visibilidade em tempo real","Telemetria embarcada","Integração total de plataformas"], correct:1},
+    {q:"O que a Fase 2 (rastreamento por satélite/GPS) trouxe de novo em relação à Fase 1?", opts:["Análise de comportamento do motorista","Posição real da viagem em tempo real, sem depender do relato do motorista","Automação total das decisões","Eliminação da necessidade de operadores humanos"], correct:1},
+    {q:"Qual limitação a Fase 2 ainda apresentava, mesmo com rastreamento em tempo real?", opts:["Não conseguia identificar desvio de rota","Sistemas ainda operavam de forma isolada, sem integração","Não existia mais nenhuma central de monitoramento","Já eliminava totalmente o risco de roubo de carga"], correct:1},
+    {q:"A Fase 3 é definida principalmente pela:", opts:["Volta ao controle manual por telefone","Integração de diferentes tecnologias em um único painel de monitoramento","Eliminação do CFTV das centrais","Substituição total dos operadores por IA"], correct:1},
+    {q:"O que caracteriza a Fase 4 da evolução tecnológica?", opts:["Telemetria embarcada e análise de comportamento do motorista","Uso exclusivo de rádio e telefone","Ausência total de tecnologia de rastreamento","Foco exclusivo em crimes, sem relação com acidentes"], correct:0},
+    {q:"🔄 Segundo a atualização 2026 desta aula, o que caracteriza a Fase 5 hoje?", opts:["Continua sendo apenas uma tendência futura, sem aplicação real","IA e análise preditiva já operacionais em centrais mais maduras, triando e priorizando riscos","Foi abandonada por não trazer resultados práticos","Substitui integralmente qualquer função humana na central"], correct:1},
+    {q:"Segundo a atualização 2026, qual é o novo papel do operador diante da automação da Fase 5?", opts:["Deixa de existir como função","Passa a decidir diante do que a IA já triou e priorizou, em vez de observar tudo manualmente","Passa a atuar exclusivamente na área de TI","Assume função puramente administrativa, sem relação com risco"], correct:1},
+    {q:"Telemetria embarcada, entre outras aplicações, permite à central:", opts:["Apenas rastrear a posição geográfica do veículo","Identificar comportamentos de condução como frenagem brusca e excesso de velocidade","Substituir a necessidade de qualquer rastreamento por GPS","Eliminar a necessidade de protocolos de contingência"], correct:1},
+    {q:"Por que é um erro comum achar que todas as centrais brasileiras já operam na Fase 5?", opts:["Porque a Fase 5 não existe de fato","Porque a maturidade tecnológica entre empresas ainda varia bastante","Porque a Fase 5 é exclusiva de outros países","Porque a Fase 5 substitui completamente a Fase 4"], correct:1},
+    {q:"A evolução das cinco fases, no conjunto, mostra uma tendência de:", opts:["Redução progressiva da tecnologia usada nas centrais","Aumento progressivo de visibilidade, integração e automação na tomada de decisão","Eliminação total da necessidade de monitoramento humano desde a Fase 2","Foco exclusivo em telefone e rádio, mesmo nas fases mais recentes"], correct:1}
+  ],
+  caso:"Uma central de monitoramento que ainda opera predominantemente na Fase 2 (rastreamento por GPS isolado) enfrenta dificuldade para identificar rapidamente qual, entre 40 viagens simultâneas, merece atenção prioritária — o operador precisa checar tela por tela. Ao migrar para uma plataforma integrada com triagem automática de risco (uma aplicação da Fase 5), o mesmo operador passa a receber uma lista já priorizada pelo sistema, com as três viagens de maior risco no topo da tela. O tempo de reação da equipe cai significativamente, não porque o operador ficou mais rápido, mas porque a tecnologia assumiu a parte de triagem que antes consumia a maior parte do tempo dele.",
+  glossario:[
+    {term:"Painel integrado", def:"Interface única que reúne dados de diferentes sistemas de monitoramento em uma mesma tela."},
+    {term:"Comportamento de condução", def:"Padrão de direção do motorista, captado por sensores de telemetria (velocidade, frenagem, tempo ao volante)."},
+    {term:"Automação de decisões", def:"Capacidade de um sistema executar ou sugerir ações sem intervenção manual direta em cada caso."},
+    {term:"Maturidade tecnológica", def:"Grau de sofisticação e integração das tecnologias utilizadas por uma central de monitoramento."}
+  ],
+  entrevista:[
+    {q:"Você consegue descrever as fases de evolução tecnológica de uma central de monitoramento?", tip:"Liste as cinco fases em ordem, com uma característica central de cada uma — mostra domínio histórico e técnico do tema, algo bastante valorizado em entrevistas de nível sênior."},
+    {q:"Como você vê o papel da Inteligência Artificial na função do operador de monitoramento?", tip:"Evite extremos (\"substitui tudo\" ou \"não muda nada\"). Posicione a IA como ferramenta de triagem que redefine o papel humano para decisão, não elimina a função."},
+    {q:"Em que fase tecnológica você classificaria a central onde trabalhou? Por quê?", tip:"Prepare uma resposta concreta com pelo menos duas evidências técnicas — isso demonstra capacidade de diagnóstico, não só de operação."}
+  ]
+},
+{
+  id:3, title:"O papel estratégico da Central de Gerenciamento de Riscos", duration:"11 min", level:"Intermediário",
+  content:[
+    "É comum, principalmente para quem está de fora da área, imaginar uma central de monitoramento como uma sala cheia de telas onde pessoas ficam \"vendo pontinhos se moverem no mapa\". Essa visão, além de simplista, esconde o que realmente torna uma CGR valiosa para o negócio: ela não é um local de observação passiva, é um <strong>centro de decisão</strong>.",
+    "A diferença entre observar e decidir é o que separa uma central operacionalmente cara de uma central que gera retorno mensurável. Uma central que só registra o que está acontecendo, sem agir sobre isso, tem o mesmo valor prático de uma câmera sem monitoramento: existe, mas não previne nada sozinha.",
+    "O papel estratégico da CGR se expressa em seis funções centrais. A primeira é <strong>monitorar viagens em tempo real</strong> — não como fim em si, mas como base de informação para todas as outras funções. A segunda é <strong>validar o cumprimento do Plano de Gerenciamento de Riscos (PGR)</strong>, garantindo que cada viagem siga as diretrizes definidas para o tipo de carga, rota e horário.",
+    "A terceira função é <strong>tratar alarmes e exceções</strong> — separar o que é ruído (falso positivo) do que exige ação real, e fazer isso rápido o suficiente para que a resposta ainda faça diferença. A quarta é <strong>acionar contingências</strong>, colocando em prática, sem hesitação, os protocolos definidos para cada tipo de ocorrência.",
+    "A quinta função é <strong>coordenar a comunicação</strong> entre motoristas, clientes, seguradoras e equipes de pronta resposta durante uma ocorrência — muitas vezes, o que decide o resultado de uma crise não é só a tecnologia usada, mas a velocidade e clareza dessa comunicação. E a sexta função, frequentemente subestimada, é <strong>produzir indicadores gerenciais</strong> que permitam à empresa enxergar padrões, prever tendências e melhorar continuamente — sem indicador, a central fica presa a apagar incêndio, sem nunca reduzir a frequência deles.",
+    "Uma central madura entende que essas seis funções não são independentes — elas formam um ciclo. O indicador gerado hoje ajusta o PGR de amanhã; o alarme tratado hoje vira dado histórico que melhora a triagem automática de amanhã. É esse ciclo contínuo, e não a quantidade de telas na parede, que define se uma CGR é, de fato, estratégica."
+  ],
+  resumo:[
+    "A CGR é um centro de decisão, não um posto de observação passiva.",
+    "Seis funções centrais: monitorar em tempo real, validar cumprimento do PGR, tratar alarmes e exceções, acionar contingências, coordenar comunicação, produzir indicadores gerenciais.",
+    "Tratar alarme bem significa separar ruído de ocorrência real com velocidade suficiente para agir a tempo.",
+    "A comunicação coordenada durante uma crise pode pesar tanto quanto a tecnologia usada.",
+    "As seis funções formam um ciclo contínuo de melhoria — indicadores de hoje ajustam processos de amanhã."
+  ],
+  conceitos:[
+    {term:"PGR", def:"Plano de Gerenciamento de Risco — diretrizes formais que definem como uma viagem deve ser conduzida com segurança."},
+    {term:"Falso positivo", def:"Alarme disparado que, após análise, não corresponde a um risco real."},
+    {term:"Pronta resposta", def:"Equipe ou serviço acionado para atuar fisicamente em uma ocorrência em andamento."},
+    {term:"Indicador gerencial", def:"Métrica usada pela liderança para acompanhar desempenho e orientar decisões estratégicas."}
+  ],
+  erros:[
+    "Tratar a central como local de observação, sem conectar monitoramento a decisão e ação.",
+    "Priorizar volume de alarmes tratados sem medir a qualidade da triagem entre falso positivo e ocorrência real.",
+    "Negligenciar a comunicação estruturada durante uma crise, mesmo com boa tecnologia de monitoramento.",
+    "Não fechar o ciclo entre indicador gerado e ajuste de processo — gerar relatório sem usá-lo para melhorar."
+  ],
+  exercicio:"Escolha uma das seis funções centrais da CGR descritas nesta aula e descreva, com um exemplo real (ou hipotético) de operação de transporte, como uma falha nessa função específica poderia gerar prejuízo — mesmo que as outras cinco funções estivessem funcionando bem.",
+  quiz:[
+    {q:"Segundo esta aula, qual é a visão correta sobre o papel de uma Central de Gerenciamento de Riscos?", opts:["Um local de observação passiva das viagens","Um centro de decisão que integra pessoas, tecnologia e processos", "Uma sala exclusivamente de TI, sem relação com risco","Um departamento que só atua depois do sinistro"], correct:1},
+    {q:"Qual das opções NÃO é uma das seis funções centrais da CGR apresentadas na aula?", opts:["Monitorar viagens em tempo real","Validar o cumprimento do PGR","Vender apólices de seguro diretamente ao cliente final","Produzir indicadores gerenciais"], correct:2},
+    {q:"O que significa \"tratar alarmes e exceções\" de forma eficaz?", opts:["Ignorar todos os alarmes até o fim do turno","Separar falso positivo de ocorrência real com velocidade suficiente para agir a tempo","Acionar contingência para absolutamente todo alarme recebido","Repassar todos os alarmes automaticamente para o cliente, sem análise"], correct:1},
+    {q:"Por que a coordenação de comunicação durante uma crise é considerada tão importante quanto a tecnologia?", opts:["Porque substitui totalmente a necessidade de rastreamento","Porque a velocidade e clareza da comunicação podem decidir o resultado da ocorrência","Porque reduz o custo do seguro automaticamente","Porque elimina a necessidade de indicadores gerenciais"], correct:1},
+    {q:"Produzir indicadores gerenciais é uma função frequentemente subestimada porque:", opts:["Não gera nenhum valor real para a empresa","Sem ela, a central fica presa a apagar incêndio, sem reduzir a frequência dos problemas","É uma função exclusiva do setor financeiro","Substitui completamente a necessidade de monitoramento"], correct:1},
+    {q:"O que caracteriza uma central \"madura\", segundo esta aula?", opts:["Ter o maior número possível de telas na sala de monitoramento","Entender que as seis funções centrais formam um ciclo contínuo de melhoria","Depender exclusivamente de decisões manuais, sem nenhum indicador","Focar apenas na função de monitoramento, sem as demais"], correct:1},
+    {q:"Validar o cumprimento do PGR significa, na prática:", opts:["Ignorar totalmente as diretrizes de rota e horário definidas","Garantir que cada viagem siga as diretrizes definidas para aquele tipo de carga e rota","Substituir o PGR por decisões improvisadas do operador","Eliminar a necessidade de qualquer plano formal de risco"], correct:1},
+    {q:"Uma central que registra dados mas não age sobre eles é comparada, na aula, a:", opts:["Um centro de inteligência operacional avançado","Uma câmera sem monitoramento — existe, mas não previne nada sozinha","O modelo ideal de CGR madura","Uma central da Fase 5 de evolução tecnológica"], correct:1},
+    {q:"O ciclo contínuo entre as seis funções centrais da CGR significa que:", opts:["Cada função opera de forma isolada, sem relação com as demais","O indicador gerado hoje pode ajustar o PGR e a triagem de amanhã","Apenas a função de monitoramento impacta as demais","O ciclo se aplica somente a centrais que usam Inteligência Artificial"], correct:1},
+    {q:"Acionar contingências, como função central da CGR, significa:", opts:["Aguardar autorização externa antes de qualquer ação em uma ocorrência crítica","Colocar em prática, sem hesitação, os protocolos definidos para cada tipo de ocorrência","Delegar toda decisão de contingência exclusivamente ao motorista","Acionar apenas em casos de sinistro já consumado"], correct:1}
+  ],
+  caso:"Durante um turno normal, uma central recebe um alarme de desvio de rota em uma viagem de carga de alto valor. O operador trata o alarme rapidamente (função 3) e confirma que não é falso positivo, mas não aciona o protocolo de contingência formalmente definido (função 4), optando por \"esperar mais um pouco para confirmar\". Vinte minutos depois, a viagem sofre uma abordagem. A investigação posterior revela que o protocolo de contingência, se acionado no momento do alarme, previa contato imediato com o motorista e roteamento de apoio de pronta resposta para a região — ação que provavelmente teria mudado o desfecho. O caso ilustra por que as seis funções da CGR precisam operar em conjunto: tratar bem o alarme sem acionar a contingência correspondente deixa a central presa a metade do seu papel estratégico.",
+  glossario:[
+    {term:"Ocorrência", def:"Evento identificado pela central que exige análise e, possivelmente, ação — nem toda ocorrência vira sinistro."},
+    {term:"Protocolo de contingência", def:"Sequência de ações pré-definidas a serem executadas diante de um tipo específico de ocorrência."},
+    {term:"Roteamento de apoio", def:"Direcionamento de uma equipe de pronta resposta para a localização de uma ocorrência em andamento."},
+    {term:"Ciclo de melhoria contínua", def:"Processo em que os resultados de uma etapa retroalimentam e aprimoram as etapas seguintes."}
+  ],
+  entrevista:[
+    {q:"Como você descreveria o papel estratégico de uma central de gerenciamento de riscos, além do monitoramento em si?", tip:"Cite as seis funções centrais de forma resumida e destaque que elas formam um ciclo, não ações isoladas."},
+    {q:"Conte sobre uma situação em que a comunicação durante uma ocorrência foi decisiva para o resultado.", tip:"Estruture com início (o que foi identificado), meio (como a comunicação foi coordenada) e fim (o resultado obtido) — recrutadores valorizam clareza de narrativa tanto quanto o resultado em si."},
+    {q:"O que você faz quando um alarme é tratado, mas fica em dúvida se aciona ou não a contingência formal?", tip:"Reforce que o protocolo existe justamente para não depender de julgamento individual sob pressão — a resposta ideal é seguir o protocolo definido, não avaliar caso a caso sob incerteza."}
+  ]
+},
+{
+  id:4, title:"Funções essenciais da CGR: monitoramento, PGR, alarmes e contingência", duration:"12 min", level:"Intermediário",
+  content:[
+    "Depois de entender o papel estratégico da CGR em visão geral, esta aula aprofunda quatro das seis funções centrais — as mais operacionais do dia a dia: monitorar viagens, validar o PGR, tratar alarmes e acionar contingências. São essas quatro que, na prática, ocupam a maior parte do tempo de um Operador de Monitoramento.",
+    "<strong>Monitorar viagens em tempo real</strong> não significa simplesmente olhar um ponto se movendo no mapa. Significa acompanhar posição, velocidade, permanência em determinado ponto e horário previsto de chegada, cruzando esses dados com o perfil de risco daquela rota e daquele tipo de carga. Uma parada de 40 minutos pode ser absolutamente normal em uma rota — e um sinal de alerta grave em outra.",
+    "<strong>Validar o cumprimento do PGR</strong> é garantir que a viagem está seguindo exatamente as diretrizes definidas antes de sair: rota autorizada, horário de circulação permitido, pontos de parada aprovados. Um desvio da rota planejada nem sempre significa roubo — pode ser um simples desvio por trânsito. Mas é justamente a validação constante contra o PGR que permite à central diferenciar rapidamente entre os dois cenários.",
+    "<strong>Tratar alarmes e exceções</strong> é, na prática do dia a dia, a atividade que mais consome tempo e atenção da equipe operacional. Um alarme pode ser gerado por parada não programada, desvio de rota, botão de pânico acionado pelo motorista, ou violação de cerca eletrônica. O desafio central não é reagir a todo alarme — é <strong>priorizar corretamente</strong> entre os que exigem ação imediata e os que são apenas ruído operacional.",
+    "<strong>Acionar contingências</strong> é o momento em que a central deixa de observar e passa a agir de forma coordenada: contato com o motorista, mobilização de pronta resposta, comunicação com o cliente e, quando necessário, acionamento de autoridades. A eficácia dessa função depende diretamente da qualidade dos protocolos definidos previamente — improvisar contingência no momento da crise é a receita mais comum para um desfecho ruim.",
+    "🔄 <strong>Atualização 2026.</strong> Em centrais mais avançadas, a triagem inicial entre alarme relevante e falso positivo já é parcialmente automatizada por algoritmos que aprendem com o histórico de ocorrências — reduzindo o volume de alarmes que chegam ao operador e priorizando os que realmente exigem decisão humana. Isso não elimina a função de tratamento de alarme, mas concentra o tempo do operador nos casos de maior risco real."
+  ],
+  resumo:[
+    "Monitorar em tempo real significa cruzar posição, velocidade e permanência com o perfil de risco da rota — não só \"ver o ponto se mover\".",
+    "Validar o PGR permite diferenciar rapidamente um desvio operacional inofensivo de um risco real.",
+    "Tratar alarmes exige priorização, não reação automática a todo sinal recebido.",
+    "Acionar contingência bem depende de protocolos definidos com antecedência — improvisar na crise raramente funciona.",
+    "🔄 Atualização 2026: triagem automatizada por IA já reduz o volume de alarmes irrelevantes chegando ao operador humano."
+  ],
+  conceitos:[
+    {term:"Cerca eletrônica", def:"Delimitação geográfica virtual que dispara alarme quando o veículo entra ou sai de uma área definida."},
+    {term:"Botão de pânico", def:"Dispositivo acionado manualmente pelo motorista para sinalizar uma emergência real à central."},
+    {term:"Priorização de alarmes", def:"Processo de classificar alarmes por nível de risco real para direcionar atenção da equipe."},
+    {term:"Improviso de contingência", def:"Ação tomada sem protocolo definido previamente, geralmente sob pressão e com maior chance de erro."}
+  ],
+  erros:[
+    "Tratar toda parada não programada como sinal de risco grave, sem considerar o contexto da rota.",
+    "Reagir a 100% dos alarmes com a mesma urgência, sem critério de priorização.",
+    "Aguardar confirmação excessiva antes de acionar contingência, perdendo a janela de tempo útil para agir.",
+    "Depender apenas da triagem automatizada sem revisão humana nos casos de maior risco."
+  ],
+  exercicio:"Monte uma lista de três tipos de alarme comuns em uma operação de transporte (ex: parada não programada, desvio de rota, botão de pânico) e, para cada um, defina um critério objetivo de priorização — o que faria esse alarme subir para o topo da fila de atendimento em vez de ficar em segundo plano.",
+  quiz:[
+    {q:"Monitorar viagens em tempo real, segundo esta aula, envolve principalmente:", opts:["Apenas observar a posição do veículo no mapa","Cruzar posição, velocidade e permanência com o perfil de risco da rota e da carga","Registrar a viagem apenas ao final do trajeto","Substituir totalmente a necessidade de PGR"], correct:1},
+    {q:"Validar o cumprimento do PGR permite à central:", opts:["Ignorar desvios de rota, considerando-os sempre irrelevantes","Diferenciar rapidamente um desvio operacional inofensivo de um risco real","Eliminar a necessidade de qualquer alarme","Substituir a necessidade de contingência"], correct:1},
+    {q:"Qual é o principal desafio ao tratar alarmes e exceções, segundo a aula?", opts:["Reagir com a mesma urgência a todo alarme recebido","Priorizar corretamente entre os que exigem ação imediata e os que são apenas ruído","Eliminar completamente os alarmes do sistema","Delegar toda decisão de alarme ao motorista"], correct:1},
+    {q:"O que é um falso positivo no contexto de alarmes de monitoramento?", opts:["Um alarme que corresponde exatamente a um roubo de carga confirmado","Um alarme disparado que, após análise, não corresponde a um risco real","Um tipo de contingência automática","Um indicador de desempenho da central"], correct:1},
+    {q:"Segundo a aula, o que costuma gerar o desfecho mais problemático em uma contingência real?", opts:["Seguir rigorosamente um protocolo pré-definido","Improvisar a resposta no momento da crise, sem protocolo definido previamente","Acionar a pronta resposta cedo demais","Validar o PGR antes da viagem começar"], correct:1},
+    {q:"🔄 Segundo a atualização 2026, o que já é parcialmente automatizado em centrais mais avançadas?", opts:["A validação jurídica de contratos de seguro","A triagem inicial entre alarme relevante e falso positivo","A contratação de motoristas","A emissão de notas fiscais"], correct:1},
+    {q:"A automação da triagem de alarmes, segundo a atualização 2026, tem como efeito principal:", opts:["Eliminar totalmente a função do operador humano","Reduzir o volume de alarmes irrelevantes que chegam ao operador, concentrando atenção nos casos de maior risco","Aumentar o número de falsos positivos tratados manualmente","Substituir integralmente os protocolos de contingência"], correct:1},
+    {q:"Uma cerca eletrônica dispara alarme quando:", opts:["O motorista aciona manualmente o botão de pânico","O veículo entra ou sai de uma área geográfica delimitada previamente","A viagem é cadastrada no sistema","O PGR é validado com sucesso"], correct:1},
+    {q:"Por que uma parada de 40 minutos pode ser normal em uma rota e um alerta grave em outra?", opts:["Porque o tempo de parada nunca é relevante para análise de risco","Porque o contexto de cada rota e tipo de carga define o que é comportamento esperado ou não","Porque toda parada é sempre um sinal de risco, independentemente da rota","Porque o PGR não tem relação com tempo de parada"], correct:1},
+    {q:"O botão de pânico é um exemplo de:", opts:["Uma tecnologia usada apenas na Fase 1 de evolução da CGR","Dispositivo acionado manualmente pelo motorista para sinalizar emergência real","Um tipo de indicador gerencial","Um protocolo de contingência automatizado por IA"], correct:1}
+  ],
+  caso:"Em uma central que recebe, em média, 300 alarmes por turno — a maioria falsos positivos de parada não programada em pontos de abastecimento conhecidos — a equipe implementa uma regra simples de priorização: qualquer alarme de botão de pânico ou violação de cerca eletrônica em rota de alto risco sobe automaticamente ao topo da fila, enquanto paradas em pontos previamente cadastrados como seguros (postos parceiros, por exemplo) são sinalizadas com prioridade mais baixa. O volume de alarmes não muda, mas o tempo de resposta aos casos realmente críticos cai de forma significativa — mostrando que o problema raramente é a quantidade de alarmes, e sim a ausência de critério de priorização.",
+  glossario:[
+    {term:"Ponto de parada aprovado", def:"Local pré-cadastrado como seguro para paradas dentro do PGR de uma rota."},
+    {term:"Desvio de rota", def:"Diferença entre o trajeto planejado e o trajeto real percorrido pelo veículo."},
+    {term:"Ruído operacional", def:"Volume de alarmes ou sinais que não representam risco real, mas consomem tempo de análise."},
+    {term:"Janela de tempo útil", def:"Período em que uma ação de contingência ainda pode mudar o resultado de uma ocorrência."}
+  ],
+  entrevista:[
+    {q:"Como você prioriza alarmes quando o volume recebido é muito alto?", tip:"Descreva um critério objetivo (tipo de alarme, nível de risco da rota, histórico do ponto) em vez de responder de forma genérica \"eu avalio caso a caso\"."},
+    {q:"Já viveu uma situação em que faltou protocolo de contingência definido? Como lidou com isso?", tip:"Reconhecer a lacuna e explicar como ajudou a formalizar um protocolo depois mostra maturidade — evite dar a entender que \"deu certo no improviso\" como se fosse a prática ideal."},
+    {q:"Qual sua opinião sobre a automação da triagem de alarmes por IA?", tip:"Posicione como ferramenta que libera tempo do operador para os casos de maior risco, sem eliminar a necessidade de julgamento humano nas decisões finais."}
+  ]
+},
+{
+  id:5, title:"🔄 De central reativa a central preditiva: IA, analytics e automação de decisões", duration:"13 min", level:"Avançado",
+  content:[
+    "Esta aula fecha o Módulo 1 com o tema que mais diferencia uma central de 2026 de uma central de dez anos atrás: a transição de um modelo reativo — que responde ao que já aconteceu — para um modelo preditivo, que antecipa o que provavelmente vai acontecer antes mesmo de qualquer alarme ser disparado.",
+    "O modelo reativo tradicional funciona assim: a viagem acontece, um evento gera um alarme, o operador analisa, decide e age. É um modelo funcional, mas seu limite é claro — ele só reage depois que algo já está em curso. Mesmo com resposta rápida, o risco já se manifestou antes de qualquer ação ser tomada.",
+    "🔄 <strong>Atualização 2026.</strong> O modelo preditivo inverte parte dessa lógica: antes mesmo da viagem começar, algoritmos analisam o histórico de sinistros da rota, o horário planejado, o tipo de carga, o perfil do motorista e até condições externas (como eventos que aumentam temporariamente o risco de uma região) para atribuir um <strong>nível de risco previsto</strong> àquela viagem específica. Viagens classificadas como alto risco podem receber tratamento diferenciado antes mesmo de sair — reforço de escolta, ajuste de horário, ou rota alternativa — em vez de esperar um alarme em campo.",
+    "Isso não significa que a central preditiva elimina o monitoramento em tempo real ou o tratamento de alarmes — ela os torna mais eficientes. Uma viagem já sinalizada como alto risco antes de sair recebe atenção prioritária automática assim que qualquer sinal de alerta aparece, em vez de competir por atenção com centenas de outras viagens de perfil neutro.",
+    "Outro efeito prático da automação de decisões é a <strong>redução do tempo entre detecção e ação</strong>. Em vez de um alarme aguardar análise manual completa antes de qualquer resposta, sistemas mais maduros já disparam ações de primeira linha automaticamente — como notificação simultânea ao motorista e à equipe de pronta resposta mais próxima — enquanto o operador humano assume a decisão sobre os próximos passos, já com o processo em movimento.",
+    "É importante frisar um ponto central deste curso: nenhuma dessas tecnologias substitui a função humana na central — elas mudam onde o valor humano é aplicado. Em vez de gastar a maior parte do tempo peneirando dados brutos, o profissional de GRIS de 2026 gasta a maior parte do tempo tomando decisões sobre os casos que a tecnologia já identificou como mais críticos. Isso exige, inclusive, um perfil profissional diferente: menos operador de tela, mais analista de risco capaz de interpretar e questionar o que o sistema está indicando."
+  ],
+  resumo:[
+    "Modelo reativo: age depois que um evento já gerou alarme.",
+    "🔄 Modelo preditivo (2026): estima nível de risco antes da viagem começar, cruzando histórico, rota, horário e perfil do motorista.",
+    "Viagens de alto risco previsto recebem tratamento diferenciado desde o planejamento, não só durante a execução.",
+    "A automação reduz o tempo entre detecção e ação de primeira linha, sem eliminar a decisão humana.",
+    "O papel do profissional de GRIS migra de \"observador de dados brutos\" para \"analista de decisão sobre casos já priorizados\"."
+  ],
+  conceitos:[
+    {term:"Modelo preditivo de risco", def:"Abordagem que estima a probabilidade de um evento de risco antes que ele ocorra, com base em dados históricos e contextuais."},
+    {term:"Nível de risco previsto", def:"Classificação atribuída a uma viagem antes de sua execução, com base em variáveis históricas e contextuais."},
+    {term:"Ação de primeira linha automatizada", def:"Resposta inicial disparada automaticamente por sistema, sem esperar análise manual completa."},
+    {term:"Analista de decisão", def:"Perfil profissional focado em interpretar e decidir sobre casos já priorizados pela tecnologia, em vez de triagem manual completa."}
+  ],
+  erros:[
+    "Achar que o modelo preditivo elimina a necessidade de monitoramento em tempo real.",
+    "Supor que a automação de decisões dispensa completamente o julgamento humano.",
+    "Ignorar variáveis contextuais (eventos externos, mudanças de perfil de rota) ao confiar cegamente na previsão automática.",
+    "Não capacitar a equipe para o novo perfil de \"analista de decisão\", mantendo o time treinado apenas para triagem manual."
+  ],
+  exercicio:"Pense em uma rota ou operação que você conhece bem. Liste três variáveis que, na sua avaliação, deveriam pesar no cálculo de um nível de risco previsto para essa rota (por exemplo: histórico de sinistros, horário, tipo de carga, evento local temporário). Justifique cada uma.",
+  quiz:[
+    {q:"O que caracteriza o modelo reativo tradicional de gestão de risco em uma CGR?", opts:["Estimar risco antes da viagem começar","Agir somente depois que um evento já gerou um alarme","Eliminar totalmente a necessidade de monitoramento","Focar exclusivamente em indicadores financeiros"], correct:1},
+    {q:"🔄 O que é o \"nível de risco previsto\", segundo a atualização 2026 desta aula?", opts:["Uma classificação atribuída à viagem depois que ela termina","Uma classificação atribuída à viagem antes de sua execução, com base em dados históricos e contextuais","Um indicador exclusivo de desempenho do motorista","Um tipo de alarme disparado apenas em caso de sinistro confirmado"], correct:1},
+    {q:"Uma viagem classificada como alto risco previsto pode receber, antes mesmo de sair:", opts:["Nenhum tratamento diferenciado até que um alarme seja disparado","Reforço de escolta, ajuste de horário ou rota alternativa","Cancelamento automático e obrigatório","Isenção total de monitoramento em tempo real"], correct:1},
+    {q:"O modelo preditivo, segundo a aula, elimina a necessidade de:", opts:["Monitoramento em tempo real e tratamento de alarmes","Nenhuma das duas funções — ele as torna mais eficientes, não as elimina","Apenas do tratamento de alarmes","Apenas do monitoramento em tempo real"], correct:1},
+    {q:"O que significa \"ação de primeira linha automatizada\"?", opts:["Uma decisão final tomada exclusivamente por IA, sem revisão humana","Uma resposta inicial disparada automaticamente pelo sistema, enquanto o operador assume os próximos passos","Um tipo de alarme que nunca precisa ser tratado","Um relatório gerado apenas ao final do mês"], correct:1},
+    {q:"Segundo a aula, qual é a mudança de perfil profissional esperada para o time de GRIS em 2026?", opts:["De analista de decisão para operador de triagem manual","De operador de tela para analista de risco, focado em decisões sobre casos priorizados","Extinção completa da função de monitoramento","Nenhuma mudança relevante de perfil é necessária"], correct:1},
+    {q:"Por que é um erro confiar cegamente na previsão automática de risco?", opts:["Porque a previsão automática nunca deve ser usada em nenhuma hipótese","Porque variáveis contextuais e eventos externos podem não estar totalmente capturados pelo modelo","Porque a previsão automática é sempre menos precisa que a análise manual","Porque o modelo preditivo é proibido por lei em 2026"], correct:1},
+    {q:"A transição de modelo reativo para preditivo tem como principal benefício:", opts:["Reduzir o tempo entre detecção de risco e ação, antecipando tratamento antes mesmo de eventos ocorrerem","Eliminar por completo a necessidade de indicadores gerenciais","Tornar desnecessária qualquer forma de contingência","Substituir integralmente a função do PGR"], correct:0},
+    {q:"O que a aula reforça sobre o papel humano diante da automação de decisões?", opts:["A tecnologia substitui totalmente o valor humano na central","A tecnologia muda onde o valor humano é aplicado, e não o elimina","O papel humano se torna irrelevante a partir da Fase 5","A automação torna a experiência profissional em GRIS menos valorizada"], correct:1},
+    {q:"Uma variável contextual que pode entrar no cálculo do nível de risco previsto é:", opts:["A cor do veículo utilizado na viagem","Um evento local temporário que aumenta o risco de determinada região","O nome do cliente final da carga","O número de funcionários administrativos da empresa"], correct:1}
+  ],
+  caso:"Uma central que adota modelo preditivo identifica, através da análise de histórico, que viagens com carga eletrônica saindo em determinado horário da tarde, em uma rota específica, apresentam risco significativamente mais alto do que a média da frota — mesmo sem nenhum alarme ativo até o momento. Com essa informação, a empresa passa a programar reforço de escolta automaticamente para esse padrão específico de viagem, antes mesmo de qualquer sinal de risco em campo. Seis meses depois, a frequência de ocorrências nesse padrão específico de viagem cai de forma expressiva — não porque a central passou a reagir mais rápido a alarmes, mas porque parte do risco deixou de se materializar, já tratado na fase de planejamento.",
+  glossario:[
+    {term:"Dado histórico", def:"Conjunto de informações sobre eventos passados usado como base para análise preditiva."},
+    {term:"Evento externo temporário", def:"Situação pontual (protesto, feriado, operação policial, entre outros) que altera o nível de risco de uma região por período limitado."},
+    {term:"Reforço de escolta", def:"Acréscimo de proteção física (veículo de apoio, segurança adicional) atribuído a uma viagem de risco elevado."},
+    {term:"Perfil de rota", def:"Conjunto de características históricas e estatísticas associadas a determinado trajeto."}
+  ],
+  entrevista:[
+    {q:"O que você entende por gestão preditiva de risco no transporte de cargas?", tip:"Explique o conceito com um exemplo concreto de variável usada na previsão (histórico, horário, tipo de carga) — evite resposta genérica sem exemplo."},
+    {q:"Como a automação de decisões muda o dia a dia de quem trabalha em uma central de monitoramento?", tip:"Foque na mudança de perfil: menos tempo em triagem manual, mais tempo em decisão qualificada sobre casos já priorizados."},
+    {q:"Você confiaria totalmente em um modelo preditivo para decidir o reforço de segurança de uma viagem?", tip:"Boa resposta reconhece o valor do modelo, mas defende revisão humana em decisões de maior impacto — mostra pensamento crítico, não adesão cega à tecnologia."}
+  ]
+}
+];
+
+let state = { activeModule:1, activeLesson:1, done:{}, quizChecked:false };
+
+function renderManifest(){
+  const el = document.getElementById('manifest');
+  let html = `<div class="manifest-head">
+      <span class="eyebrow">Manifesto do curso</span>
+      <p>8 módulos, dos fundamentos da CGR ao projeto final. Módulo 01 disponível na íntegra, com atualizações regulatórias e tecnológicas de 2026 assinaladas.</p>
+    </div>`;
+  MODULES.forEach(m=>{
+    const active = m.n === state.activeModule ? 'active' : '';
+    html += `<button class="mod-row ${active}" onclick="selectModule(${m.n})">
+      <div class="row-top">
+        <span class="mod-num">Módulo ${String(m.n).padStart(2,'0')}</span>
+        <span class="pill ${m.live?'live':'soon'}">${m.live?'Disponível':'Em breve'}</span>
+      </div>
+      <p class="mod-title">${m.title}</p>
+    </button>`;
+    if(m.n === state.activeModule && m.live){
+      html += `<div class="lesson-list">`;
+      LESSONS.forEach(l=>{
+        const lact = l.id === state.activeLesson ? 'active':'';
+        const ldone = state.done[l.id] ? 'done':'';
+        html += `<button class="lesson-item ${lact} ${ldone}" onclick="selectLesson(${l.id})">
+          <span class="lesson-dot">${state.done[l.id]?'<i>✓</i>':''}</span>
+          <span>Aula ${l.id} — ${l.title}</span>
+        </button>`;
+      });
+      html += `</div>`;
+    }
+  });
+  el.innerHTML = html;
+}
+
+function renderLocked(mod){
+  const chips = mod.topics.map(t=>`<div class="topic-chip">${t}</div>`).join('');
+  document.getElementById('main').innerHTML = `
+    <div class="locked-doc">
+      <span class="eyebrow">Módulo ${String(mod.n).padStart(2,'0')} · Estrutura do curso</span>
+      <h2>${mod.title}</h2>
+      <p>Este módulo faz parte da estrutura completa do curso e segue o mesmo padrão do Módulo 01: aulas em microformato, resumo, conceitos-chave, erros comuns, exercício prático, quiz de 10 perguntas, estudo de caso e preparação para entrevista — com as atualizações de 2026 sinalizadas ao longo do conteúdo.</p>
+      <div class="topics-grid">${chips}</div>
+      <div class="lock-note"><span>&#9679;</span> Conteúdo completo liberado nas próximas entregas do curso</div>
+    </div>`;
+}
+
+function renderLesson(l){
+  const conceptCards = l.conceitos.map(c=>`<div class="concept-card"><p class="term">${c.term}</p><p class="def">${c.def}</p></div>`).join('');
+  const erroBoxes = l.erros.map(e=>`<div class="warn-box"><p><strong>Erro comum —</strong> ${e}</p></div>`).join('');
+  const glossary = l.glossario.map(g=>`<div class="glossary-item"><p class="g-term">${g.term}</p><p class="g-def">${g.def}</p></div>`).join('');
+  const interview = l.entrevista.map(q=>`<div class="interview-item"><p class="interview-q">${q.q}</p><p class="interview-a">${q.tip}</p></div>`).join('');
+  const quizItems = l.quiz.map((q,qi)=>{
+    const opts = q.opts.map((o,oi)=>`<label class="quiz-opt" data-qi="${qi}" data-oi="${oi}">
+        <input type="radio" name="q${qi}" value="${oi}"><span>${o}</span>
+      </label>`).join('');
+    return `<div class="quiz-item">
+        <p class="quiz-q"><span>${String(qi+1).padStart(2,'0')}</span>${q.q}</p>
+        ${opts}
+      </div>`;
+  }).join('');
+
+  document.getElementById('main').innerHTML = `
+    <div class="doc">
+      <span class="eyebrow">Aula ${String(l.id).padStart(2,'0')} · Módulo 01 — Fundamentos e Evolução da Central de Gerenciamento de Riscos</span>
+      <h2 class="display">${l.title}</h2>
+      <div class="doc-meta">
+        <div>Duração<strong>${l.duration}</strong></div>
+        <div>Nível<strong>${l.level}</strong></div>
+        <div>Formato<strong>Microaula + prática</strong></div>
+      </div>
+      ${l.content.map(p=>`<p>${p}</p>`).join('')}
+
+      <p class="section-label">Resumo</p>
+      <ul class="doc-list">${l.resumo.map(r=>`<li>${r}</li>`).join('')}</ul>
+
+      <p class="section-label">Conceitos-chave</p>
+      <div class="concept-grid">${conceptCards}</div>
+
+      <p class="section-label">Erros mais comuns</p>
+      ${erroBoxes}
+
+      <p class="section-label">Exercício prático</p>
+      <div class="task-box"><p>${l.exercicio}</p></div>
+
+      <p class="section-label">Quiz — 10 perguntas</p>
+      <div id="quiz-body">${quizItems}</div>
+      <div class="quiz-actions">
+        <button class="btn-check" onclick="checkQuiz()">Corrigir quiz</button>
+        <span id="quiz-score"></span>
+      </div>
+
+      <p class="section-label">Estudo de caso</p>
+      <div class="case-box"><span class="eyebrow">Cenário real de operação</span><p>${l.caso}</p></div>
+
+      <p class="section-label">Glossário</p>
+      ${glossary}
+
+      <p class="section-label">Perguntas de entrevista</p>
+      ${interview}
+    </div>`;
+
+  state.done[l.id] = true;
+  updateRadar();
+  renderManifest();
+}
+
+function checkQuiz(){
+  const lesson = LESSONS.find(l=>l.id===state.activeLesson);
+  let correctCount = 0;
+  lesson.quiz.forEach((q,qi)=>{
+    const selected = document.querySelector(`input[name="q${qi}"]:checked`);
+    const opts = document.querySelectorAll(`.quiz-opt[data-qi="${qi}"]`);
+    opts.forEach(o=>{
+      const oi = parseInt(o.getAttribute('data-oi'));
+      o.classList.remove('correct','wrong');
+      if(oi === q.correct){ o.classList.add('correct'); }
+      else if(selected && parseInt(selected.value) === oi){ o.classList.add('wrong'); }
+    });
+    if(selected && parseInt(selected.value) === q.correct) correctCount++;
+  });
+  document.getElementById('quiz-score').innerHTML = `Resultado: <strong>${correctCount}/10</strong> respostas corretas`;
+}
+
+function updateRadar(){
+  const total = LESSONS.length;
+  const doneCount = Object.keys(state.done).length;
+  const circumference = 169.6;
+  const offset = circumference - (circumference * (doneCount/total));
+  document.getElementById('ring-fg').style.strokeDashoffset = offset;
+  document.getElementById('ring-label').textContent = doneCount + '/' + total;
+  document.getElementById('progress-text').textContent = doneCount === 0
+    ? 'Nenhuma aula concluída'
+    : (doneCount === total ? 'Módulo 01 concluído' : doneCount + ' de ' + total + ' aulas vistas');
+}
+
+function selectModule(n){
+  state.activeModule = n;
+  const mod = MODULES.find(m=>m.n===n);
+  if(mod.live){
+    if(!LESSONS.find(l=>l.id===state.activeLesson)) state.activeLesson = 1;
+    renderManifest();
+    renderLesson(LESSONS.find(l=>l.id===state.activeLesson));
+  } else {
+    renderManifest();
+    renderLocked(mod);
+  }
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function selectLesson(id){
+  state.activeLesson = id;
+  renderManifest();
+  renderLesson(LESSONS.find(l=>l.id===id));
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+renderManifest();
+renderLesson(LESSONS[0]);
+</script>
+</body>
+</html>
